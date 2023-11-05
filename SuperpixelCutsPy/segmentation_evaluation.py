@@ -2,7 +2,7 @@
 import numpy as np
 from sklearn.metrics import confusion_matrix
 from normalized_cuts import *
-from preprocessing import *
+from utility import *
 from superpixel import *
 from unmixing import *
 

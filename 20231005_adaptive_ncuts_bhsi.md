@@ -19,12 +19,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 import h5py
-from normalized_cuts import *
-from preprocessing import *
-from Preprocesser import *
-from superpixel import *
-from unmixing import *
-from segmentation_evaluation import *
+from SuperpixelCutsPy import *
 # Configs for Notebooks
 os.chdir('c:\\Users\\apopo\\Desktop\\Research')
 plt.rcParams["figure.figsize"] = [9,7]

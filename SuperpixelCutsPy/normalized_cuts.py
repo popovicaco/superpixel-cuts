@@ -1,7 +1,7 @@
 import numpy as np
 import sklearn.cluster as sklcluster
 from unmixing import *
-from preprocessing import *
+from utility import *
 from superpixel import *
 from segmentation_evaluation import *
 
