@@ -1,10 +1,10 @@
 # Imports
 import numpy as np
 from sklearn.metrics import confusion_matrix
-from normalized_cuts import *
-from utility import *
-from superpixel import *
-from unmixing import *
+from .normalized_cuts import *
+from .utility import *
+from .superpixel import *
+from .unmixing import *
 
 def justify_segmentation_labels(ground_truth, predicted):
     '''

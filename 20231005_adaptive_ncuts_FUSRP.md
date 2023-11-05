@@ -40,7 +40,7 @@ del h5_import
 ```
 
 ```python
-preprocessing_pipeline = Preprocesser(data=hyperspectral_cube)
+preprocessing_pipeline = Preprocesser.Preprocesser(data = hyperspectral_cube)
 #preprocessing_pipeline.gaussian_blur(blur_param = 0)
 preprocessing_pipeline.singular_value_decomposition(n_svd = 5)
 preprocessing_pipeline.layer_normalization()

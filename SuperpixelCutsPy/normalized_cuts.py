@@ -1,9 +1,9 @@
 import numpy as np
 import sklearn.cluster as sklcluster
-from unmixing import *
-from utility import *
-from superpixel import *
-from segmentation_evaluation import *
+from .unmixing import *
+from .utility import *
+from .superpixel import *
+from .segmentation_evaluation import *
 
 def example_function():
     '''
