@@ -177,6 +177,30 @@ def calc_mean_label_signatures(spectral_library, labels):
         mean_endmember_spectra[:,i] = spectral_library[:,np.where(labels == unique_labels[i])[0]].mean(axis=1) 
     return mean_endmember_spectra
 
+def calc_mean_label_signatures_v2(spectral_library  : np.ndarray,
+                                  labels            : np.ndarray,
+                                  ignore_label      : int = -1):
+    """
+    Description:
+        Extract Mean Label Spectra Signature
+    ===========================================
+    Args:
+        spectral_library (np.ndarray): _description_
+        labels (np.ndarray): _description_
+    ===========================================
+    Returns:
+        np.ndarray: _description_
+    """
+    nb, _ = spectral_library.shape
+    unique_labels = np.unique(labels)
+    if ignore_label in unique_labels:
+        unique_labels = unique_labels[1::].copy()
+    ne = len(unique_labels)
+    mean_endmember_spectra = np.zeros((nb,ne))
+    for i in range(ne):
+        mean_endmember_spectra[:,i] = spectral_library[:,np.where(labels == unique_labels[i])[0]].mean(axis=1) 
+    return mean_endmember_spectra
+
 def calc_std_label_signatures(spectral_library, labels):
     '''
     Description:

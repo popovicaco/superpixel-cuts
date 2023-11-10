@@ -55,10 +55,13 @@ plt.imshow(hyperspectral_cube[:,:,0])
 SLIC Superpixel Generation
 
 ```python
-n_superpixels = 1250 #2500
+n_superpixels = 1500 #2500
 slic_m_param = 2    #2
-assignments, centers = generate_SLIC_assignments(data = hyperspectral_cube, n_superpixels = n_superpixels, slic_m_param = slic_m_param)
-superpixeled_cube, superpixel_library = generate_SLIC_superpixels(data = hyperspectral_cube, assignments = assignments)
+assignments, centers = superpixel.generate_SLIC_assignments(data = hyperspectral_cube,
+                                                            n_superpixels = n_superpixels,
+                                                            slic_m_param = slic_m_param)
+superpixeled_cube, superpixel_library = superpixel.generate_SLIC_superpixels(data = hyperspectral_cube,
+                                                                             assignments = assignments)
 n_superpixels = len(np.unique(assignments))
 ```
 
@@ -79,16 +82,16 @@ sigma_param = 0.01 # 0.1 -> 0.001           #0.01
 spatial_limit = 35# 15 -> 25 in steps of 5 #15
 ne = 5#number of endmembers
 
-superpixel_cluster_labels, mean_cluster_spectra = single_ncuts(data=hyperspectral_cube,
-                                                                superpixel_library=superpixel_library,
-                                                                superpixel_centers=centers,
-                                                                superpixel_assignments=assignments,
-                                                                n_endmembers=ne,
-                                                                spectral_sigma2_param=sigma_param,
-                                                                spatial_kappa_param=spatial_limit,
-                                                                spectral_metric='EUCLIDEAN')
+superpixel_cluster_labels, mean_cluster_spectra = normalized_cuts.single_ncuts(data=hyperspectral_cube,
+                                                                                superpixel_library=superpixel_library,
+                                                                                superpixel_centers=centers,
+                                                                                superpixel_assignments=assignments,
+                                                                                n_endmembers=ne,
+                                                                                spectral_sigma2_param=sigma_param,
+                                                                                spatial_kappa_param=spatial_limit,
+                                                                                spectral_metric='EUCLIDEAN')
 
-labelled_img = assign_labels_onto_image(assignments, superpixel_cluster_labels)
+labelled_img = normalized_cuts.assign_labels_onto_image(assignments, superpixel_cluster_labels)
 ```
 
 ```python
@@ -118,32 +121,6 @@ Split up a chunk further
 
 
 ```python
-def calc_mean_label_signatures_v2(spectral_library  : np.ndarray,
-                                  labels            : np.ndarray,
-                                  ignore_label      : int = -1):
-    """
-    Description:
-        Extract Mean Label Spectra Signature
-    ===========================================
-    Args:
-        spectral_library (np.ndarray): _description_
-        labels (np.ndarray): _description_
-    ===========================================
-    Returns:
-        np.ndarray: _description_
-    """
-    nb, _ = spectral_library.shape
-    unique_labels = np.unique(labels)
-    if ignore_label in unique_labels:
-        unique_labels = unique_labels[1::].copy()
-    ne = len(unique_labels)
-    mean_endmember_spectra = np.zeros((nb,ne))
-    for i in range(ne):
-        mean_endmember_spectra[:,i] = spectral_library[:,np.where(labels == unique_labels[i])[0]].mean(axis=1) 
-    return mean_endmember_spectra
-```
-
-```python
 chunk_label = 3
 subsegmented_labels = superpixel_cluster_labels.copy()
 chunk_assignments = np.vectorize(lambda x: x if x in list(np.where(subsegmented_labels == chunk_label)[0]) else -1)(assignments)
@@ -155,14 +132,14 @@ chunk_superpixel_centers = centers[(superpixel_cluster_labels == chunk_label),:]
 chunk_sigma_param = 0.01 # 0.1 -> 0.001           #0.01
 chunk_spatial_limit = 35# 15 -> 25 in steps of 5 #15
 
-chunk_labels, chunk_spectra = superpixel_subsegment(data=hyperspectral_cube,
-                                                                superpixel_library=chunk_superpixel_library,
-                                                                superpixel_centers=chunk_superpixel_centers,
-                                                                superpixel_assignments=chunk_assignments,
-                                                                n_endmembers=2,
-                                                                spectral_param=chunk_sigma_param,
-                                                                spatial_param=chunk_spatial_limit,
-                                                                spectral_metric='EUCLIDEAN')
+chunk_labels, chunk_spectra = normalized_cuts.superpixel_subsegment(data=hyperspectral_cube,
+                                                                    superpixel_library=chunk_superpixel_library,
+                                                                    superpixel_centers=chunk_superpixel_centers,
+                                                                    superpixel_assignments=chunk_assignments,
+                                                                    n_endmembers=2,
+                                                                    spectral_param=chunk_sigma_param,
+                                                                    spatial_param=chunk_spatial_limit,
+                                                                    spectral_metric='EUCLIDEAN')
 
 subsegmented_labels[(superpixel_cluster_labels == chunk_label)] = np.vectorize(lambda x: chunk_label if x == 0 else ne)(chunk_labels)
 ```
@@ -177,7 +154,7 @@ cmap = plt.get_cmap('Spectral', ne+1)
 colors = cmap(list(np.unique(subsegmented_labels)))
 
 ax.imshow(hyperspectral_cube[:,:,layer_preview], alpha = 0.9);
-im = ax.imshow(assign_labels_onto_image(assignments, subsegmented_labels), cmap = cmap, alpha= 0.7, vmin = 0);
+im = ax.imshow(normalized_cuts.assign_labels_onto_image(assignments, subsegmented_labels), cmap = cmap, alpha= 0.7, vmin = 0);
 ax.scatter(centers[:,1], centers[:,0], c='black', s=0.1);
 ax.set_title(f'Subsegmenting Retina + Choroid \n σ = {chunk_sigma_param}, k = {chunk_spatial_limit}' , fontsize = 5);
 
@@ -189,9 +166,5 @@ ax.set_title(f'Subsegmenting Retina + Choroid \n σ = {chunk_sigma_param}, k = {
 fig.subplots_adjust(right=0.825)
 cbar_ax = fig.add_axes([0.85, 0.15, 0.05, 0.7])
 fig.colorbar(im, cax=cbar_ax);
-
-```
-
-```python
 
 ```
