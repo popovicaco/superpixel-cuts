@@ -456,3 +456,37 @@ def superpixel_subsegment(data                   : np.ndarray,
     mean_cluster_spectra = calc_mean_label_signatures(superpixel_library, superpixel_cluster_labels)
 
     return superpixel_cluster_labels, mean_cluster_spectra
+
+def subsegment(data : np.ndarray,
+                superpixel_library : np.ndarray,
+                superpixel_centers : np.ndarray,
+                superpixel_assignments : np.ndarray,
+                segmented_labels : np.ndarray,
+                subsegment_label : int,
+                n_subsegments : int,
+                spectral_param: float,
+                spatial_param : float,
+                spectral_metric : str = "EUCLIDEAN"):
+    
+    num_endmembers = len(np.unique(segmented_labels))
+    subsegmented_labels = segmented_labels.copy()
+    chunk_assignments = np.vectorize(lambda x: x if x in list(np.where(subsegmented_labels == subsegment_label)[0]) else -1)(superpixel_assignments)
+    chunk_superpixel_library = superpixel_library[:,(segmented_labels == subsegment_label)].copy()
+    chunk_superpixel_centers = superpixel_centers[(segmented_labels == subsegment_label),:].copy()
+
+    chunk_labels, chunk_spectra = superpixel_subsegment(data                    = data,
+                                                        superpixel_library      = chunk_superpixel_library,
+                                                        superpixel_centers      = chunk_superpixel_centers,
+                                                        superpixel_assignments  = chunk_assignments,
+                                                        n_endmembers            = n_subsegments,
+                                                        spectral_param          = spectral_param,
+                                                        spatial_param           = spatial_param,
+                                                        spectral_metric         = spectral_metric)
+    
+    mapping_labels = dict(zip(np.unique(chunk_labels), np.unique(chunk_labels) + num_endmembers - 1))
+    mapping_labels[0] = subsegment_label
+
+    subsegmented_labels[(segmented_labels == subsegment_label)] = np.vectorize(lambda x: mapping_labels[x])(chunk_labels)
+    mean_cluster_spectra = calc_mean_label_signatures(superpixel_library, subsegmented_labels)
+
+    return subsegmented_labels, mean_cluster_spectra

@@ -121,27 +121,17 @@ Split up a chunk further
 
 
 ```python
-chunk_label = 1
-subsegmented_labels = superpixel_cluster_labels.copy()
-chunk_assignments = np.vectorize(lambda x: x if x in list(np.where(subsegmented_labels == chunk_label)[0]) else -1)(assignments)
-chunk_superpixel_library = superpixel_library[:,(superpixel_cluster_labels == chunk_label)].copy()
-chunk_superpixel_centers = centers[(superpixel_cluster_labels == chunk_label),:].copy()
-```
-
-```python
 chunk_sigma_param = 0.01 # 0.1 -> 0.001           #0.01
-chunk_spatial_limit = 35# 15 -> 25 in steps of 5 #15
-
-chunk_labels, chunk_spectra = normalized_cuts.superpixel_subsegment(data=hyperspectral_cube,
-                                                                    superpixel_library=chunk_superpixel_library,
-                                                                    superpixel_centers=chunk_superpixel_centers,
-                                                                    superpixel_assignments=chunk_assignments,
-                                                                    n_endmembers=2,
-                                                                    spectral_param=chunk_sigma_param,
-                                                                    spatial_param=chunk_spatial_limit,
-                                                                    spectral_metric='EUCLIDEAN')
-
-subsegmented_labels[(superpixel_cluster_labels == chunk_label)] = np.vectorize(lambda x: chunk_label if x == 0 else ne)(chunk_labels)
+chunk_spatial_limit = 35
+subsegmented_labels, subsegmented_library = normalized_cuts.subsegment(data = hyperspectral_cube,
+                                                superpixel_library = superpixel_library,
+                                                superpixel_centers = centers,
+                                                superpixel_assignments = assignments,
+                                                segmented_labels = superpixel_cluster_labels,
+                                                subsegment_label = 1,
+                                                n_subsegments = 2,
+                                                spectral_param = chunk_sigma_param,
+                                                spatial_param = chunk_spatial_limit)
 ```
 
 ```python
@@ -149,8 +139,8 @@ fig, ax = plt.subplots(1,1, dpi=150);
 layer_preview = 20
 iter_preview = 0
 n_layers = 60
-
-cmap = plt.get_cmap('Spectral', ne+1)
+n_e = len(np.unique(subsegmented_labels))
+cmap = plt.get_cmap('Spectral', n_e)
 colors = cmap(list(np.unique(subsegmented_labels)))
 
 ax.imshow(hyperspectral_cube[:,:,layer_preview], alpha = 0.9);
@@ -166,5 +156,9 @@ ax.set_title(f'Subsegmenting Retina + Choroid \n σ = {chunk_sigma_param}, k = {
 fig.subplots_adjust(right=0.825)
 cbar_ax = fig.add_axes([0.85, 0.15, 0.05, 0.7])
 fig.colorbar(im, cax=cbar_ax);
+
+```
+
+```python
 
 ```
