@@ -132,6 +132,11 @@ subsegmented_labels, subsegmented_library = normalized_cuts.subsegment(data = hy
                                                 n_subsegments = 2,
                                                 spectral_param = chunk_sigma_param,
                                                 spatial_param = chunk_spatial_limit)
+
+_, superpixel_original_library = superpixel.generate_SLIC_superpixels(data = original_hyperspectral_cube,
+                                                                      assignments = assignments)
+
+subsegmented_original_library = segmentation_evaluation.calc_mean_label_signatures(superpixel_original_library, subsegmented_labels)
 ```
 
 ```python
@@ -152,14 +157,10 @@ ax[1].scatter(centers[:,1], centers[:,0], c='black', s=0.1);
 ax[1].set_title(f'Subsegmented Image' , fontsize = 5);
 
 for i in range(n_e):
-    ax[2].plot(subsegmented_library[:,i], color=colors[i])
+    ax[2].plot(subsegmented_original_library[:,i], color=colors[i])
 ax[2].set_title(f'Extracted Signatures' , fontsize = 5);
 
 fig.subplots_adjust(right=0.825)
 cbar_ax = fig.add_axes([0.85, 0.15, 0.05, 0.7])
 fig.colorbar(im, cax=cbar_ax);
-```
-
-```python
-
 ```

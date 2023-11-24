@@ -132,6 +132,11 @@ subsegmented_labels, subsegmented_library = normalized_cuts.subsegment(data = hy
                                                 n_subsegments = 2,
                                                 spectral_param = chunk_sigma_param,
                                                 spatial_param = chunk_spatial_limit)
+
+_, superpixel_original_library = superpixel.generate_SLIC_superpixels(data = original_hyperspectral_cube,
+                                                                      assignments = assignments)
+
+subsegmented_original_library = segmentation_evaluation.calc_mean_label_signatures(superpixel_original_library, subsegmented_labels)
 ```
 
 ```python
@@ -146,13 +151,13 @@ colors = cmap(list(np.unique(subsegmented_labels)))
 ax[0].imshow(hyperspectral_cube[:,:,layer_preview]);
 ax[0].set_title(f'Original Image \n Layer {layer_preview}', fontsize = 5);
 
-ax[1].imshow(hyperspectral_cube[:,:,layer_preview], alpha = 0.8);
-im = ax[1].imshow(normalized_cuts.assign_labels_onto_image(assignments, subsegmented_labels), cmap = cmap, alpha= 0.9, vmin = 0);
+ax[1].imshow(hyperspectral_cube[:,:,layer_preview], alpha = 0.9);
+im = ax[1].imshow(normalized_cuts.assign_labels_onto_image(assignments, subsegmented_labels), cmap = cmap, alpha= 0.7, vmin = 0);
 ax[1].scatter(centers[:,1], centers[:,0], c='black', s=0.1);
 ax[1].set_title(f'Subsegmented Image' , fontsize = 5);
 
 for i in range(n_e):
-    ax[2].plot(subsegmented_library[:,i], color=colors[i])
+    ax[2].plot(subsegmented_original_library[:,i], color=colors[i])
 ax[2].set_title(f'Extracted Signatures' , fontsize = 5);
 
 fig.subplots_adjust(right=0.825)
@@ -161,5 +166,5 @@ fig.colorbar(im, cax=cbar_ax);
 ```
 
 ```python
-
+# test blood segementation on the choroid label
 ```
