@@ -123,7 +123,7 @@ Split up a chunk further
 ```python
 chunk_sigma_param = 0.01 # 0.1 -> 0.001           #0.01
 chunk_spatial_limit = 35
-subsegmented_labels = normalized_cuts.subsegment(data = hyperspectral_cube,
+subsegmented_labels, subsegmented_library = normalized_cuts.subsegment(data = hyperspectral_cube,
                                                 superpixel_library = superpixel_library,
                                                 superpixel_centers = centers,
                                                 superpixel_assignments = assignments,
@@ -135,28 +135,29 @@ subsegmented_labels = normalized_cuts.subsegment(data = hyperspectral_cube,
 ```
 
 ```python
-fig, ax = plt.subplots(1,1, dpi=150);
+fig, ax = plt.subplots(1,3, figsize=(19,5), dpi=200);
 layer_preview = 20
 iter_preview = 0
 n_layers = 60
 n_e = len(np.unique(subsegmented_labels))
-cmap = plt.get_cmap('Spectral', n_e)
+cmap = plt.get_cmap('Dark2', n_e)
 colors = cmap(list(np.unique(subsegmented_labels)))
 
-ax.imshow(hyperspectral_cube[:,:,layer_preview], alpha = 0.9);
-im = ax.imshow(normalized_cuts.assign_labels_onto_image(assignments, subsegmented_labels), cmap = cmap, alpha= 0.7, vmin = 0);
-ax.scatter(centers[:,1], centers[:,0], c='black', s=0.1);
-ax.set_title(f'Subsegmenting Retina + Choroid \n σ = {chunk_sigma_param}, k = {chunk_spatial_limit}' , fontsize = 5);
+ax[0].imshow(hyperspectral_cube[:,:,layer_preview]);
+ax[0].set_title(f'Original Image \n Layer {layer_preview}', fontsize = 5);
 
-# ax[1].imshow(hyperspectral_cube[:,:,layer_preview], alpha = 0.9);
-# im = ax[1].imshow(assign_labels_onto_image(assignments, superpixel_cluster_labels), cmap = cmap, alpha= 0.7, vmin = 0);
-# ax[1].scatter(centers[:,1], centers[:,0], c='black', s=0.1);
-# ax[1].set_title(f'Original Segmentation \n n_superpixels = {n_superpixels}, m = {slic_m_param}, σ = {sigma_param}, k = {spatial_limit},  n_layers = {n_layers}' , fontsize = 5);
+ax[1].imshow(hyperspectral_cube[:,:,layer_preview], alpha = 0.9);
+im = ax[1].imshow(normalized_cuts.assign_labels_onto_image(assignments, subsegmented_labels), cmap = cmap, alpha= 0.7, vmin = 0);
+ax[1].scatter(centers[:,1], centers[:,0], c='black', s=0.1);
+ax[1].set_title(f'Subsegmented Image' , fontsize = 5);
+
+for i in range(n_e):
+    ax[2].plot(subsegmented_library[:,i], color=colors[i])
+ax[2].set_title(f'Extracted Signatures' , fontsize = 5);
 
 fig.subplots_adjust(right=0.825)
 cbar_ax = fig.add_axes([0.85, 0.15, 0.05, 0.7])
 fig.colorbar(im, cax=cbar_ax);
-
 ```
 
 ```python
