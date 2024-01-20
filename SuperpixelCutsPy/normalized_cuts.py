@@ -298,7 +298,14 @@ def adaptive_ncuts(data, superpixel_library, superpixel_centers, superpixel_assi
     
     return superpixel_cluster_labels, mean_cluster_spectra, history, convergence_checks
 
-def single_ncuts(data, superpixel_library, superpixel_centers, superpixel_assignments, n_endmembers, spectral_sigma2_param, spatial_kappa_param, spectral_metric = 'SAM'):
+def single_ncuts(data,
+                 superpixel_library,
+                 superpixel_centers,
+                 superpixel_assignments,
+                 n_endmembers,
+                 spectral_sigma2_param,
+                 spatial_kappa_param,
+                 spectral_metric = 'SAM'):
     '''
     Description:
         Adaptive NCuts algorithm using Unmixing Information
@@ -387,14 +394,14 @@ def basic_hole_filling(superpixel_cluster_labels, assignments, superpixel_librar
 
 
 def superpixel_subsegment(data                   : np.ndarray,
-                     superpixel_library     : np.ndarray,
-                     superpixel_centers     : np.ndarray,
-                     superpixel_assignments : np.ndarray,
-                     n_endmembers           : int,
-                     spectral_param         : float,
-                     spatial_param          : float,
-                     spectral_metric        : str,
-                     ignore_label           : int = -1):
+                            superpixel_library     : np.ndarray,
+                            superpixel_centers     : np.ndarray,
+                            superpixel_assignments : np.ndarray,
+                            n_endmembers           : int,
+                            spectral_param         : float,
+                            spatial_param          : float,
+                            spectral_metric        : str,
+                            ignore_label           : int = -1):
     """
      Description:
         Adaptive NCuts algorithm using Unmixing Information
@@ -489,4 +496,75 @@ def subsegment(data : np.ndarray,
     subsegmented_labels[(segmented_labels == subsegment_label)] = np.vectorize(lambda x: mapping_labels[x])(chunk_labels)
     mean_cluster_spectra = calc_mean_label_signatures(superpixel_library, subsegmented_labels)
 
-    return subsegmented_labels, mean_cluster_spectra
+    return subsegmented_labels, 
+
+def single_ncuts_admm(data,
+                 superpixel_library,
+                 superpixel_centers,
+                 superpixel_assignments,
+                 n_endmembers,
+                 spectral_sigma2_param,
+                 spatial_kappa_param,
+                 spectral_metric = 'SAM'):
+    '''
+    Description:
+        Adaptive NCuts algorithm using Unmixing Information
+        i) Do the initial clustering
+        ii) Unmix using the extracted clusters as endmembers
+        iii) Concatenate unmixing information to the end of the hyperspectral cube
+        iv) Recreate the Superpixeled Cube with the new spectral information
+        v) Do the spectral clustering on the new superpixeled cube
+    ===========================================
+    Parameters:
+        data  
+        superpixel_library
+        superpixel_centers
+        superpixel_assignments
+        n_endmembers
+        spectral_sigma2_param
+        spectral_metric
+        spatial_kappa_param
+    ===========================================
+    Returns:
+        labels
+        endmember_spectra
+    ===========================================
+    References:
+        [1] Jianbo Shi and J. Malik, "Normalized cuts and image segmentation," in IEEE 
+            Transactions on Pattern Analysis and Machine Intelligence, vol. 22, no. 8, 
+            pp. 888-905, Aug. 2000, doi: 10.1109/34.868688.
+    '''
+    nx, ny, nb = data.shape
+    hyperspectral_image = cube_to_matrix(data)
+    spatial_filter = (calc_spatial_distance_mtx(superpixel_centers, 1, 1) < spatial_kappa_param).astype(int) # gets cached
+    history = []
+    convergence_checks = []
+
+    ## Initial Normalized Cuts Segmentation
+    spectral_similarity_mtx = calc_spectral_similarity_mtx(superpixel_library, sigma2_param = spectral_sigma2_param, metric=spectral_metric)
+    spatial_spectral_matrix = spatial_filter * spectral_similarity_mtx
+    superpixel_cluster_labels = sklcluster.spectral_clustering(spatial_spectral_matrix, n_clusters=n_endmembers)
+    history.append(superpixel_cluster_labels)
+
+    ## Extract Mean Cluster Spectral Signatures
+    mean_cluster_spectra = calc_mean_label_signatures(superpixel_library, superpixel_cluster_labels)
+    print(f'Initial Clustering')
+
+    ## Unmix Original HSI using Mean Cluster Spectral Signatures
+    abund_mtx, _ = fclsu_admm(mean_cluster_spectra, hyperspectral_image)
+    abund_cube = matrix_to_cube(abund_mtx, nx, ny, n_endmembers)
+
+    # Concatenate Unmixing Results to Original HSI, then Superpixel using Old Assignments
+    abundance_plus_hyperspectral_cube = np.concatenate([data, abund_cube], axis = 2)
+    _, abundance_plus_superpixel_library = generate_SLIC_superpixels(abundance_plus_hyperspectral_cube, superpixel_assignments)
+    
+    # Cluster Signatures + Abundances using Normalized Cuts Segmentation
+    print(f'Spectral + Unmixing Clustering')
+    spectral_similarity_mtx = calc_spectral_similarity_mtx(abundance_plus_superpixel_library, sigma2_param = spectral_sigma2_param, metric='SAM')
+    spatial_spectral_matrix = spatial_filter * spectral_similarity_mtx
+    superpixel_cluster_labels = sklcluster.spectral_clustering(spatial_spectral_matrix, n_clusters=n_endmembers, random_state = 5)
+
+    ## Extract New Mean Cluster Spectral Signatures
+    mean_cluster_spectra = calc_mean_label_signatures(superpixel_library, superpixel_cluster_labels)
+
+    return superpixel_cluster_labels, mean_cluster_spectra

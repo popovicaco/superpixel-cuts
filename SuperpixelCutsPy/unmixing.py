@@ -122,3 +122,71 @@ def active_set_fcls(endmember_spectra, data, delta = 100):
     for i in range(abund_mtx.shape[1]):
         abund_mtx[:,i] = pixel_nnls(delta_M, delta_X[:,i]).reshape(n_end)
     return abund_mtx
+
+## Fully Constrained Least Squares using ADMM (Method 2)
+def convex_projection(X, projection="probability_simplex"):
+    '''
+        Projects the columns of a matrix X - (m,n) onto a convex set
+        projection = 'probability_simplex' will project the columns
+        of the matrix onto the set △(N) = { a ∈ R^N_+ | 1^T a = 1 }
+        sourced from: https://gist.github.com/mblondel/6f3b7aaad90606b98f71
+    '''
+    if projection == 'probability_simplex':
+        p, n = X.shape
+        u = np.sort(X, axis=0)[::-1, ...]
+        pi = np.cumsum(u, axis=0) - 1
+        ind = (np.arange(p) + 1).reshape(-1, 1)
+        mask = (u - pi / ind) > 0
+        rho = p - 1 - np.argmax(mask[::-1, ...], axis=0)
+        theta = pi[tuple([rho, np.arange(n)])] / (rho + 1)
+        return np.maximum(X - theta, 0)    
+    
+def calculate_norm(data, p = 2, q = 2):
+    '''Calculates the L_{p,q} mixed matrix norm'''
+    n_rows, n_cols = data.shape
+    # sum by row, then column
+    return ((data**p).sum(axis = 1)**(q/p)).sum()**(1/q)
+
+def fclsu_admm(M, X, mu = 1, n_iters = 200, eps_tol = 0.001):
+    '''
+        ADMM Based Impementation of Fully Constrained Linear Unmixing
+        Parameters:
+            M - Known Endmember Spectra Matrix
+            X - Hyperspectral Image Matrix
+            mu - ADMM convergence parameter
+            eps_tol - convergence criteria
+    '''
+    history = {
+        'loss':[],
+        'primal_residual':[],
+        'dual_residual':[],
+        'n_iters':0
+    }
+    _, n_endmember = M.shape
+    n_p = X.shape[1]
+
+    A = np.ones((n_endmember, n_p))
+    B = np.ones((n_endmember, n_p))
+    tilde_B = np.ones((n_endmember, n_p))
+    tilde_B_prev = np.ones((n_endmember, n_p))
+
+    PI = np.linalg.inv(M.T @ M + mu*np.eye(n_endmember)) #Calculate before hand
+
+    for k in range(n_iters):
+        A = PI@(M.T@X + mu*(B-tilde_B)) #A Update
+        B = convex_projection(A + tilde_B)      #B Update
+        tilde_B_prev = tilde_B.copy()   #Used for tracking
+        tilde_B = tilde_B + A - B       #Residual Update
+
+        ## REPORTING ##
+        history['loss'].append(calculate_norm(M@A - X)) 
+        history['primal_residual'].append(calculate_norm(A-B))
+        history['dual_residual'].append(mu*calculate_norm(tilde_B-tilde_B_prev))
+        history['n_iters'] += 1
+
+        if calculate_norm(A-B) < eps_tol:
+            print(f'Terminated at Iteration {k}')
+            break
+
+    abund_mtx = A.copy()
+    return abund_mtx, history

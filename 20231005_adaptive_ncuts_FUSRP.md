@@ -49,13 +49,13 @@ original_hyperspectral_cube = preprocessing_pipeline.original_data.copy()
 ```
 
 ```python
-plt.imshow(hyperspectral_cube[:,:,0])
+plt.imshow(hyperspectral_cube[:,:,0]);
 ```
 
 SLIC Superpixel Generation
 
 ```python
-n_superpixels = 1500 #2500
+n_superpixels = 2500 #2500
 slic_m_param = 2    #2
 assignments, centers = superpixel.generate_SLIC_assignments(data = hyperspectral_cube,
                                                             n_superpixels = n_superpixels,
@@ -70,7 +70,7 @@ fig, ax = plt.subplots(1,2, dpi=200);
 layer_preview = 20
 ax[0].imshow(hyperspectral_cube[:,:,layer_preview]);
 ax[1].imshow(superpixeled_cube[:,:,layer_preview])
-ax[1].scatter(centers[:,1], centers[:,0], c='black', s=0.1);
+ax[1].scatter(centers[:,1], centers[:,0], c='white', s=0.1);
 ax[0].set_title(f'Original Image Layer {layer_preview}', fontsize = 8);
 ax[1].set_title(f'Superpixeled Image n={len(np.unique(assignments))}', fontsize = 8);
 ```
@@ -80,7 +80,7 @@ Spatial-Spectral Pixel Clustering
 ```python
 sigma_param = 0.01 # 0.1 -> 0.001           #0.01
 spatial_limit = 35# 15 -> 25 in steps of 5 #15
-ne = 5#number of endmembers
+ne = 6#number of endmembers
 
 superpixel_cluster_labels, mean_cluster_spectra = normalized_cuts.single_ncuts(data=hyperspectral_cube,
                                                                                 superpixel_library=superpixel_library,
@@ -95,9 +95,16 @@ labelled_img = normalized_cuts.assign_labels_onto_image(assignments, superpixel_
 ```
 
 ```python
+_, superpixel_original_library = superpixel.generate_SLIC_superpixels(data = original_hyperspectral_cube,
+                                                                      assignments = assignments)
+
+original_library = segmentation_evaluation.calc_mean_label_signatures(superpixel_original_library, superpixel_cluster_labels)
+```
+
+```python
 fig, ax = plt.subplots(1,3, figsize=(19,5), dpi=200);
 layer_preview = 20
-n_layers = 60
+#n_layers = 60
 cmap = plt.get_cmap('Spectral', ne)
 colors = cmap(list(np.unique(assignments)))
 
@@ -106,10 +113,10 @@ ax[0].set_title(f'Original Image \n Layer {layer_preview}', fontsize = 5);
 
 im = ax[1].imshow(labelled_img, cmap = cmap, vmin = 0);
 ax[1].scatter(centers[:,1], centers[:,0], c='black', s=0.5);
-ax[1].set_title(f'Spatial-Spectral Pixel Clustering Results \n n_superpixels = {n_superpixels}, σ = {sigma_param}, k = {spatial_limit}, n_layers = {n_layers}' , fontsize = 5);
+ax[1].set_title(f'Spatial-Spectral Pixel Clustering Results \n n_superpixels = {n_superpixels}, σ = {sigma_param}, k = {spatial_limit}' , fontsize = 5);
 
 for i in range(ne):
-    ax[2].plot(mean_cluster_spectra[:,i], color=colors[i])
+    ax[2].plot(original_library[:,i], color=colors[i])
 ax[2].set_title(f'Extracted Mean Superpixel Endmember Signatures \n n_superpixels = {n_superpixels}, σ = {sigma_param}, k = {spatial_limit}', fontsize = 5);
 
 fig.subplots_adjust(right=0.825)
@@ -121,8 +128,9 @@ Split up a chunk further
 
 
 ```python
-chunk_sigma_param = 0.01 # 0.1 -> 0.001           #0.01
+chunk_sigma_param = 0.01 # 0.1 -> 0.001        
 chunk_spatial_limit = 35
+label_to_subsegment = 3
 subsegmented_labels, subsegmented_library = normalized_cuts.subsegment(data = hyperspectral_cube,
                                                 superpixel_library = superpixel_library,
                                                 superpixel_centers = centers,
@@ -163,4 +171,8 @@ ax[2].set_title(f'Extracted Signatures' , fontsize = 5);
 fig.subplots_adjust(right=0.825)
 cbar_ax = fig.add_axes([0.85, 0.15, 0.05, 0.7])
 fig.colorbar(im, cax=cbar_ax);
+```
+
+```python
+
 ```
