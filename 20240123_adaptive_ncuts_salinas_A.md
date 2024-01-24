@@ -18,39 +18,36 @@ import os
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib as mpl
+import scipy as sp
 import h5py
 from SuperpixelCutsPy import *
+# Configs for Notebooks
 plt.rcParams["figure.figsize"] = [9,7]
 np.set_printoptions(suppress=True)
 ```
 
 ```python
-dataset_name = 'fields_data_2022'
-h5_import = h5py.File("data/bhsi_2022.h5",'r+').get('Cube/resultarray/inputdata')
-hyperspectral_cube = np.array(h5_import)
-hyperspectral_cube = np.moveaxis(np.array(hyperspectral_cube), [0], [2])
-hyperspectral_cube = np.moveaxis(np.array(hyperspectral_cube), [0], [1])
-hyperspectral_cube = hyperspectral_cube[5:205, 5:205, :].copy()
-nx,ny,nb = hyperspectral_cube.shape
-del h5_import
+dataset_name = 'Salinas'
+hyperspectral_cube = sp.io.loadmat("data/SalinasA_corrected.mat")['salinasA_corrected'] # Load Dataset
+ground_truth = sp.io.loadmat("data/SalinasA_gt.mat")['salinasA_gt']
+ground_truth = np.vectorize(lambda x: {0: 0, 1:1, 10:2, 11:3, 12:4, 13:5, 14:6}[x])(ground_truth)
+nx, ny, nb = hyperspectral_cube.shape
+print(hyperspectral_cube.shape)
 ```
 
 ```python
 preprocessing_pipeline = Preprocesser.Preprocesser(data = hyperspectral_cube)
 #preprocessing_pipeline.gaussian_blur(blur_param = 0)
-preprocessing_pipeline.singular_value_decomposition(n_svd = 5)
+preprocessing_pipeline.singular_value_decomposition(n_svd = 10)
 preprocessing_pipeline.layer_normalization()
 hyperspectral_cube = preprocessing_pipeline.data.copy()
 original_hyperspectral_cube = preprocessing_pipeline.original_data.copy()
+hyperspectral_cube = hyperspectral_cube[0:55,0:55,:]
+ground_truth = ground_truth[0:55,0:55]
 ```
 
 ```python
-plt.imshow(hyperspectral_cube[:,:,0]);
-plt.colorbar();
-```
-
-```python
-n_superpixels = 2500 #2500
+n_superpixels = 150 #2500
 slic_m_param = 2    #2
 assignments, centers = superpixel.generate_SLIC_assignments(data = hyperspectral_cube,
                                                             n_superpixels = n_superpixels,
@@ -72,8 +69,8 @@ ax[1].set_title(f'Superpixeled Image n={len(np.unique(assignments))}', fontsize 
 
 ```python
 sigma_param = 0.01 # 0.1 -> 0.001           #0.01
-spatial_limit = 35# 15 -> 25 in steps of 5 #15
-ne = 6#number of endmembers
+spatial_limit = 20# 15 -> 25 in steps of 5 #15
+ne = 5#number of endmembers
 
 superpixel_cluster_labels, mean_cluster_spectra = normalized_cuts.single_ncuts_admm(data=hyperspectral_cube,
                                                                                 superpixel_library=superpixel_library,
@@ -93,7 +90,19 @@ original_library = segmentation_evaluation.calc_mean_label_signatures(superpixel
 ```
 
 ```python
+plt.imshow((labelled_img+1)*(ground_truth != 0))
+```
+
+```python
 plt.imshow(labelled_img);
+```
+
+```python
+plt.plot(original_library);
+```
+
+```python
+
 ```
 
 ```python

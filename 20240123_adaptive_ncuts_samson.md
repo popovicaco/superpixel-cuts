@@ -18,21 +18,20 @@ import os
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib as mpl
+import scipy as sp
 import h5py
 from SuperpixelCutsPy import *
+# Configs for Notebooks
 plt.rcParams["figure.figsize"] = [9,7]
 np.set_printoptions(suppress=True)
 ```
 
 ```python
-dataset_name = 'fields_data_2022'
-h5_import = h5py.File("data/bhsi_2022.h5",'r+').get('Cube/resultarray/inputdata')
-hyperspectral_cube = np.array(h5_import)
-hyperspectral_cube = np.moveaxis(np.array(hyperspectral_cube), [0], [2])
-hyperspectral_cube = np.moveaxis(np.array(hyperspectral_cube), [0], [1])
-hyperspectral_cube = hyperspectral_cube[5:205, 5:205, :].copy()
+# Load Dataset
+dataset_name = 'samson'
+h5_import = sp.io.loadmat("data/samson.mat")['V']
+hyperspectral_cube = utility.matrix_to_cube(h5_import, 95, 95, 156).astype(float)
 nx,ny,nb = hyperspectral_cube.shape
-del h5_import
 ```
 
 ```python
@@ -45,12 +44,12 @@ original_hyperspectral_cube = preprocessing_pipeline.original_data.copy()
 ```
 
 ```python
-plt.imshow(hyperspectral_cube[:,:,0]);
+plt.imshow(hyperspectral_cube[:,:,2]);
 plt.colorbar();
 ```
 
 ```python
-n_superpixels = 2500 #2500
+n_superpixels = 500 #2500
 slic_m_param = 2    #2
 assignments, centers = superpixel.generate_SLIC_assignments(data = hyperspectral_cube,
                                                             n_superpixels = n_superpixels,
@@ -71,9 +70,9 @@ ax[1].set_title(f'Superpixeled Image n={len(np.unique(assignments))}', fontsize 
 ```
 
 ```python
-sigma_param = 0.01 # 0.1 -> 0.001           #0.01
-spatial_limit = 35# 15 -> 25 in steps of 5 #15
-ne = 6#number of endmembers
+sigma_param = 0.025 # 0.1 -> 0.001           #0.01
+spatial_limit = 50# 15 -> 25 in steps of 5 #15
+ne = 3#number of endmembers
 
 superpixel_cluster_labels, mean_cluster_spectra = normalized_cuts.single_ncuts_admm(data=hyperspectral_cube,
                                                                                 superpixel_library=superpixel_library,
@@ -94,6 +93,10 @@ original_library = segmentation_evaluation.calc_mean_label_signatures(superpixel
 
 ```python
 plt.imshow(labelled_img);
+```
+
+```python
+plt.plot(original_library);
 ```
 
 ```python

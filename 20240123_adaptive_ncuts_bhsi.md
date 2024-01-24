@@ -21,14 +21,13 @@ import matplotlib as mpl
 import h5py
 from SuperpixelCutsPy import *
 # Configs for Notebooks
-os.chdir('c:\\Users\\apopo\\Desktop\\Research')
 plt.rcParams["figure.figsize"] = [9,7]
 np.set_printoptions(suppress=True)
 ```
 
 ```python
 dataset_name = 'fields_data_2022'
-h5_import = h5py.File("C:/Users/apopo/Desktop/Research/Data/fields_data_2022.h5",'r+').get('Cube/resultarray/inputdata')
+h5_import = h5py.File("data/bhsi_2023.h5",'r+').get('Cube/resultarray/inputdata')
 hyperspectral_cube = np.array(h5_import)
 hyperspectral_cube = np.moveaxis(np.array(hyperspectral_cube), [0], [2])
 hyperspectral_cube = np.moveaxis(np.array(hyperspectral_cube), [0], [1])
@@ -44,6 +43,11 @@ preprocessing_pipeline.singular_value_decomposition(n_svd = 5)
 preprocessing_pipeline.layer_normalization()
 hyperspectral_cube = preprocessing_pipeline.data.copy()
 original_hyperspectral_cube = preprocessing_pipeline.original_data.copy()
+```
+
+```python
+plt.imshow(hyperspectral_cube[:,:,0]);
+plt.colorbar();
 ```
 
 ```python
@@ -69,10 +73,10 @@ ax[1].set_title(f'Superpixeled Image n={len(np.unique(assignments))}', fontsize 
 
 ```python
 sigma_param = 0.01 # 0.1 -> 0.001           #0.01
-spatial_limit = 35# 15 -> 25 in steps of 5 #15
-ne = 6#number of endmembers
+spatial_limit = 45# 15 -> 25 in steps of 5 #15
+ne = 5#number of endmembers
 
-superpixel_cluster_labels, mean_cluster_spectra = normalized_cuts.single_ncuts(data=hyperspectral_cube,
+superpixel_cluster_labels, mean_cluster_spectra = normalized_cuts.single_ncuts_admm(data=hyperspectral_cube,
                                                                                 superpixel_library=superpixel_library,
                                                                                 superpixel_centers=centers,
                                                                                 superpixel_assignments=assignments,
@@ -90,33 +94,7 @@ original_library = segmentation_evaluation.calc_mean_label_signatures(superpixel
 ```
 
 ```python
-plt.imshow(labelled_img);
-```
-
-```python
-sigma_param = 0.01 # 0.1 -> 0.001           #0.01
-spatial_limit = 35# 15 -> 25 in steps of 5 #15
-ne = 6#number of endmembers
-
-superpixel_cluster_labels, mean_cluster_spectra = normalized_cuts.single_ncuts_admm(data=hyperspectral_cube,
-                                                                                superpixel_library=superpixel_library,
-                                                                                superpixel_centers=centers,
-                                                                                superpixel_assignments=assignments,
-                                                                                n_endmembers=ne,
-                                                                                spectral_sigma2_param=sigma_param,
-                                                                                spatial_kappa_param=spatial_limit,
-                                                                                spectral_metric='EUCLIDEAN')
-
-labelled_img_2 = normalized_cuts.assign_labels_onto_image(assignments, superpixel_cluster_labels)
-
-_, superpixel_original_library = superpixel.generate_SLIC_superpixels(data = original_hyperspectral_cube,
-                                                                      assignments = assignments)
-
-original_library = segmentation_evaluation.calc_mean_label_signatures(superpixel_original_library, superpixel_cluster_labels)
-```
-
-```python
-plt.imshow(labelled_img);
+plt.imshow(labelled_img_2);
 ```
 
 ```python
