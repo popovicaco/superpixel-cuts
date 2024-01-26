@@ -94,9 +94,13 @@ original_library = segmentation_evaluation.calc_mean_label_signatures(superpixel
 ```
 
 ```python
-plt.imshow(labelled_img_2);
+plt.imshow(labelled_img);
 ```
 
 ```python
+plt.plot(original_library);
+```
 
+```python
+plt.plot(mean_cluster_spectra);
 ```

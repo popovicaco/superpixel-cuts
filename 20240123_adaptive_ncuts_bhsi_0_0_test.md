@@ -26,7 +26,7 @@ np.set_printoptions(suppress=True)
 
 ```python
 dataset_name = 'fields_data_2022'
-h5_import = h5py.File("data/bhsi_2022.h5",'r+').get('Cube/resultarray/inputdata')
+h5_import = h5py.File("data/bhsi_0_0.h5",'r+').get('Cube/resultarray/inputdata')
 hyperspectral_cube = np.array(h5_import)
 hyperspectral_cube = np.moveaxis(np.array(hyperspectral_cube), [0], [2])
 hyperspectral_cube = np.moveaxis(np.array(hyperspectral_cube), [0], [1])
@@ -36,6 +36,12 @@ del h5_import
 ```
 
 ```python
+plt.imshow(hyperspectral_cube[:,:,0]);
+plt.colorbar();
+```
+
+```python
+
 preprocessing_pipeline = Preprocesser.Preprocesser(data = hyperspectral_cube)
 #preprocessing_pipeline.gaussian_blur(blur_param = 0)
 preprocessing_pipeline.singular_value_decomposition(n_svd = 5)
@@ -50,7 +56,7 @@ plt.colorbar();
 ```
 
 ```python
-n_superpixels = 2500 #2500
+n_superpixels =  500 #2500
 slic_m_param = 2    #2
 assignments, centers = superpixel.generate_SLIC_assignments(data = hyperspectral_cube,
                                                             n_superpixels = n_superpixels,
@@ -71,9 +77,9 @@ ax[1].set_title(f'Superpixeled Image n={len(np.unique(assignments))}', fontsize 
 ```
 
 ```python
-sigma_param = 0.01 # 0.1 -> 0.001           #0.01
-spatial_limit = 35# 15 -> 25 in steps of 5 #15
-ne = 6#number of endmembers
+sigma_param = 0.025# 0.1 -> 0.001           #0.01
+spatial_limit = 30# 15 -> 25 in steps of 5 #15
+ne = 5#number of endmembers
 
 superpixel_cluster_labels, mean_cluster_spectra = normalized_cuts.single_ncuts_admm(data=hyperspectral_cube,
                                                                                 superpixel_library=superpixel_library,

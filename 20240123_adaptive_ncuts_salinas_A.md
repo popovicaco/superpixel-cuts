@@ -100,11 +100,3 @@ plt.imshow(labelled_img);
 ```python
 plt.plot(original_library);
 ```
-
-```python
-
-```
-
-```python
-
-```
