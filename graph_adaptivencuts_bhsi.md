@@ -216,10 +216,6 @@ del h5_import
 ```
 
 ```python
-layer_normalized_spectra = np.load("data/layer_normalized_spectra_bhsi.npy")
-```
-
-```python
 preprocessing_pipeline = Preprocesser.Preprocesser(data = hyperspectral_cube)
 #preprocessing_pipeline.gaussian_blur(blur_param = 0)
 preprocessing_pipeline.singular_value_decomposition(n_svd = 5)
@@ -250,50 +246,8 @@ ax[1].set_title(f'Superpixeled Image n={len(np.unique(assignments))}', fontsize 
 ```
 
 ```python
-def calculate_norm(A : np.ndarray,
-                    p : int = 2,
-                    q : int = 2) -> float:
-    '''
-        Calculates the L_{p,q} mixed matrix norm
-    '''
-    n_rows, n_cols = A.shape
-    # sum by row, then column
-    return ((np.abs(A)**p).sum(axis = 1)**(q/p)).sum()**(1/q)
-
-def convex_projection(X : np.ndarray) -> np.ndarray:
-    '''
-        Projects the columns of a matrix X - (m,n) onto a convex set
-        projection = 'probability_simplex' will project the columns
-        of the matrix onto the set △(N) = { a ∈ R^N_+ | 1^T a = 1 }
-        sourced from: https://gist.github.com/mblondel/6f3b7aaad90606b98f71
-    '''
-    p, n = X.shape
-    u = np.sort(X, axis=0)[::-1, ...]
-    pi = np.cumsum(u, axis=0) - 1
-    ind = (np.arange(p) + 1).reshape(-1, 1)
-    mask = (u - pi / ind) > 0
-    rho = p - 1 - np.argmax(mask[::-1, ...], axis=0)
-    theta = pi[tuple([rho, np.arange(n)])] / (rho + 1)
-    return np.maximum(X - theta, 0)
-
-def primal_residual_norm(M : np.ndarray,
-                         U : np.ndarray,
-                         V1 : np.ndarray,
-                         V2 : np.ndarray,
-                         V3 : np.ndarray ) -> float:
-    '''
-        Calculates the Primal Residual Norm
-                \|GU + BV\|_F 
-    '''
-    return np.sqrt(calculate_norm(M@U - V1)**2 + calculate_norm(U-V2)**2 + calculate_norm(U-V3)**2)
-
-def dual_residual_norm(mu_param, M, D1, D2, D3, D1_prev, D2_prev, D3_prev):
-    '''
-        Calculates the Dual Residual Frobenius Norm
-                \|mu*(G.T@V)@(D - D_prev)\|_F 
-    '''
-    return mu_param*np.sqrt(calculate_norm(M.T@(D1 - D1_prev))**2 + calculate_norm(D2 - D2_prev)**2 + calculate_norm(D3 - D3_prev)**2)  
-
+from SuperpixelCutsPy.normalized_cuts import *
+from SuperpixelCutsPy.unmixing import graph_fclsu_admm
 def create_cube(ASSIGNMENTS, ABUND):
     nx, ny = ASSIGNMENTS.shape
     ne, n_p = ABUND.shape
@@ -305,121 +259,139 @@ def create_cube(ASSIGNMENTS, ABUND):
                 cube[i, j, k] = ABUND[k, ASSIGNMENTS[i, j]]
 
     return cube
-```
 
-```python
-from scipy.sparse.csgraph import laplacian
-def graph_fclsu_admm_2(M       : np.ndarray,
-                     X       : np.ndarray,
-                     centers : np.ndarray,
-                     d_max   : float,
-                     beta    : float,
-                     mu      : float = 1.0,
-                     n_iters : int = 200,
-                     eps_tol : float = 0.001):
+def graph_regularized_ncuts_admm(data,
+                        superpixel_library,
+                        superpixel_centers,
+                        superpixel_assignments,
+                        n_endmembers,
+                        spectral_sigma2_param,
+                        spatial_kappa_param,
+                        spatial_dmax_param,
+                        spatial_beta_param,
+                        spectral_metric = 'SAM'):
     '''
-        ADMM Based Impementation of Graph Regularized Fully Constrained Linear Unmixing
-        Parameters:
-            M       - Known Endmember Spectra Matrix
-            X       - Hyperspectral Image Matrix
-            centers - Superpixel Centers
-            D_max   - Maximum Spatial Distance to be considered "similar"
-            beta    - Graph Regularization parameter
-            mu      - ADMM convergence parameter
-            eps_tol - convergence criteria
+    Description:
+        Adaptive NCuts algorithm using Unmixing Information
+        i) Do the initial clustering
+        ii) Unmix using the extracted clusters as endmembers
+        iii) Concatenate unmixing information to the end of the hyperspectral cube
+        iv) Recreate the Superpixeled Cube with the new spectral information
+        v) Do the spectral clustering on the new superpixeled cube
+    ===========================================
+    Parameters:
+        data  
+        superpixel_library
+        superpixel_centers
+        superpixel_assignments
+        n_endmembers
+        spectral_sigma2_param
+        spectral_metric
+        spatial_kappa_param
+        spatial_dmax
+        spatial_beta_param
     '''
-    history = {
-        'loss':[],
-        'primal_residual':[],
-        'dual_residual':[],
-        'n_iters':0
-    }
+    nx, ny, nb = data.shape
+    hyperspectral_image = cube_to_matrix(data)
+    distance_mtx = calc_spatial_distance_mtx(superpixel_centers, 1, 1)
+    spatial_filter = (distance_mtx < spatial_kappa_param).astype(int) # gets cached
+    history = []
+    convergence_checks = []
 
-    _, n_endmember = M.shape
-    n_p = X.shape[1]
+    ## Initial Normalized Cuts Segmentation
+    spectral_similarity_mtx = calc_spectral_similarity_mtx(superpixel_library, sigma2_param = spectral_sigma2_param, metric=spectral_metric)
+    spatial_spectral_matrix = spatial_filter * spectral_similarity_mtx
+    superpixel_cluster_labels = sklcluster.spectral_clustering(spatial_spectral_matrix, n_clusters=n_endmembers)
+    history.append(superpixel_cluster_labels)
 
-    ### Initializations ###
-    U  = np.random.random((n_endmember, n_p))
-    V1 = M@(U.copy()) #np.random.random((n_band, n_p)) ## V1 = MU 
-    V2 = U.copy()
-    V3 = U.copy()
+    ## Extract Mean Cluster Spectral Signatures
+    mean_cluster_spectra = calc_mean_label_signatures(superpixel_library, superpixel_cluster_labels)
+    print(f'Initial Clustering')
 
-    D1 = np.zeros_like(V1) # M@(U.copy()) ## V1 = MU
-    D2 = np.zeros_like(V2) #U.copy()
-    D3 = np.zeros_like(V3) #U.copy()
+    ## Unmix Original HSI using Mean Cluster Spectral Signatures
+    abund_mtx, history = graph_fclsu_admm(mean_cluster_spectra,
+                                          superpixel_library,
+                                            d_mtx = distance_mtx,
+                                            d_max = spatial_dmax_param,
+                                            beta = spatial_beta_param,
+                                            mu = 1, #0.01
+                                            n_iters=200,  ## In practice, ASC constraint is held well when n_iters is high
+                                            eps_tol=0.01)
     
-    ### Residuals for Tracking
-    D1_prev = None
-    D2_prev = None
-    D2_prev = None
+    abund_cube = create_cube(ASSIGNMENTS= superpixel_assignments, ABUND= abund_mtx)
 
-    distance_mtx = normalized_cuts.calc_spatial_distance_mtx(centers= centers, nx = 1, ny = 1)
-    W = laplacian((distance_mtx <= d_max).astype(int))
-    S, E, _ = np.linalg.svd(W) # w = S E S.T
+    # Concatenate Unmixing Results to Original HSI, then Superpixel using Old Assignments
+    abundance_plus_hyperspectral_cube = np.concatenate([data, abund_cube], axis = 2)
+    _, abundance_plus_superpixel_library = generate_SLIC_superpixels(abundance_plus_hyperspectral_cube, superpixel_assignments)
+    
+    # Cluster Signatures + Abundances using Normalized Cuts Segmentation
+    print(f'Spectral + Unmixing Clustering')
+    spectral_similarity_mtx = calc_spectral_similarity_mtx(abundance_plus_superpixel_library, sigma2_param = spectral_sigma2_param, metric='SAM')
+    spatial_spectral_matrix = spatial_filter * spectral_similarity_mtx
+    superpixel_cluster_labels = sklcluster.spectral_clustering(spatial_spectral_matrix, n_clusters=n_endmembers, random_state = 5)
 
-    partial_V2_update = np.linalg.inv(np.diag(E) + (mu/beta)*np.eye(n_p))
-    partial_U_update = np.linalg.inv(M.T @ M + 2*np.eye(n_endmember))
+    ## Extract New Mean Cluster Spectral Signatures
+    mean_cluster_spectra = calc_mean_label_signatures(superpixel_library, superpixel_cluster_labels)
 
-    for k in range(n_iters):
-        if k%50 == 0:
-            print(k)
-        ## U Update
-        U = partial_U_update@(M.T@(V1 + D1) + (V2 + D2) + (V3 + D3))
-        ## V1 Update
-        V1 = (1/(1+mu))*(X + mu*(M@U - D1))
-        ## V2 Update (Soft Thresholding Operator)
-        #V2 = soft_threshold(U - D2, lambda_param/mu_param)
-        V2 = (mu/beta)*(U - D2)@S@partial_V2_update@S.T
-        ## V3 Update - Projection onto Delta
-        V3 = convex_projection(U - D3)
-        ## D1,D2,D3 Update 
-        D1_prev = D1.copy()
-        D2_prev = D2.copy()
-        D3_prev = D3.copy()
-
-        D1 = D1 - M@U + V1
-        D2 = D2 - U + V2
-        D3 = D3 - U + V3
-
-        loss = calculate_norm(M@U - X, p=2, q=2)**2 + np.trace(U@W@U.T)
-        primal_res = primal_residual_norm(M,U,V1,V2,V3)
-        dual_res = dual_residual_norm(mu, M, D1, D2, D3, D1_prev, D2_prev, D3_prev)
-
-        ## REPORTING ##
-        history['loss'].append(loss) 
-        history['primal_residual'].append(primal_res)
-        history['dual_residual'].append(dual_res)
-        history['n_iters'] += 1
-
-    return U, history
-
+    return superpixel_cluster_labels, mean_cluster_spectra
 ```
 
 ```python
-abund_mtx, history = graph_fclsu_admm(layer_normalized_spectra,
-                                     superpixel_library,
-                                     centers = centers,
-                                     d_max = 10,
-                                     beta = 0.3,
-                                     mu = 1, #0.01
-                                     n_iters=200,  ## In practice, ASC constraint is held well when n_iters is high
-                                     eps_tol=0.01)
+sigma_param = 0.005 # 0.1 -> 0.001           #0.01
+spatial_limit = 35# 15 -> 25 in steps of 5 #15
 
-abund_cube = create_cube(ASSIGNMENTS = assignments, ABUND= abund_mtx)
+ne = 5#number of endmembers
+
+superpixel_cluster_labels, mean_cluster_spectra = graph_regularized_ncuts_admm(data=hyperspectral_cube,
+                                                                                superpixel_library=superpixel_library,
+                                                                                superpixel_centers=centers,
+                                                                                superpixel_assignments=assignments,
+                                                                                n_endmembers=ne,
+                                                                                spectral_sigma2_param=sigma_param,
+                                                                                spatial_kappa_param=spatial_limit,
+                                                                                spatial_beta_param= 0.1,
+                                                                                spatial_dmax_param = 10,
+                                                                                spectral_metric='EUCLIDEAN')
+
+labelled_img = normalized_cuts.assign_labels_onto_image(assignments, superpixel_cluster_labels)
+
+_, superpixel_original_library = superpixel.generate_SLIC_superpixels(data = original_hyperspectral_cube,
+                                                                      assignments = assignments)
+
+#original_library = segmentation_evaluation.calc_mean_label_signatures(superpixel_original_library, superpixel_cluster_labels)
 ```
 
 ```python
-num_layers = min(abund_cube.shape[2], 5)
-
-fig, axes = plt.subplots(1, num_layers, figsize=(5*num_layers, 5))
-
-for i in range(num_layers):
-    axes[i].imshow(abund_cube[:, :, i], cmap='viridis')
-    axes[i].set_title(f'Layer {i+1}')
+plt.imshow(labelled_img);
 ```
 
 ```python
+sigma_param = 0.005 # 0.1 -> 0.001           #0.01
+spatial_limit = 35# 15 -> 25 in steps of 5 #15
 
+ne = 5#number of endmembers
+
+superpixel_cluster_labels, mean_cluster_spectra = graph_regularized_ncuts_admm(data=hyperspectral_cube,
+                                                                                superpixel_library=superpixel_library,
+                                                                                superpixel_centers=centers,
+                                                                                superpixel_assignments=assignments,
+                                                                                n_endmembers=ne,
+                                                                                spectral_sigma2_param=sigma_param,
+                                                                                spatial_kappa_param=spatial_limit,
+                                                                                spatial_beta_param= 0.1,
+                                                                                spatial_dmax_param = 10,
+                                                                                spectral_metric='SAM')
+
+labelled_img = normalized_cuts.assign_labels_onto_image(assignments, superpixel_cluster_labels)
+
+_, superpixel_original_library = superpixel.generate_SLIC_superpixels(data = original_hyperspectral_cube,
+                                                                      assignments = assignments)
+
+#original_library = segmentation_evaluation.calc_mean_label_signatures(superpixel_original_library, superpixel_cluster_labels)
+```
+
+```python
+plt.imshow(labelled_img);
 ```
 
 TO DO:

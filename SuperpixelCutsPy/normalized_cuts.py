@@ -139,6 +139,18 @@ def calc_spectral_similarity_mtx(spectral_library, sigma2_param, metric = 'SAM')
     heat_kernel = np.exp((-(similarity_mtx**2)/sigma2_param))
     return heat_kernel
     
+def create_cube(ASSIGNMENTS, ABUND):
+    nx, ny = ASSIGNMENTS.shape
+    ne, n_p = ABUND.shape
+    cube = np.zeros((nx, ny, ne))
+
+    for i in range(nx):
+        for j in range(ny):
+            for k in range(ne):
+                cube[i, j, k] = ABUND[k, ASSIGNMENTS[i, j]]
+
+    return cube
+
 def assign_labels_onto_image(assignments, labels):
     '''
     Description:
