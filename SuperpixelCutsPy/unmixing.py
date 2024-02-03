@@ -1,4 +1,5 @@
 import numpy as np
+import scipy as sp
 
 def pixel_nnls(endmember_spectra, pixel_vec):
     '''
@@ -193,33 +194,12 @@ def fclsu_admm(M, X, mu = 1, n_iters = 200, eps_tol = 0.001):
     abund_mtx = A.copy()
     return abund_mtx, history
 
-# EVIL UNMIXING CODE, PLEASE DONT TRY T UNDERSTAND JUST TRUST ME IT WORKS
-
-def primal_residual_norm(M : np.ndarray,
-                         U : np.ndarray,
-                         V1 : np.ndarray,
-                         V2 : np.ndarray,
-                         V3 : np.ndarray ) -> float:
-    '''
-        Calculates the Primal Residual Norm
-                \|GU + BV\|_F 
-    '''
-    return np.sqrt(calculate_norm(M@U - V1)**2 + calculate_norm(U-V2)**2 + calculate_norm(U-V3)**2)
-
-def dual_residual_norm(mu_param, M, D1, D2, D3, D1_prev, D2_prev, D3_prev):
-    '''
-        Calculates the Dual Residual Frobenius Norm
-                \|mu*(G.T@V)@(D - D_prev)\|_F 
-    '''
-    return mu_param*np.sqrt(calculate_norm(M.T@(D1 - D1_prev))**2 + calculate_norm(D2 - D2_prev)**2 + calculate_norm(D3 - D3_prev)**2)  
-
-
-from scipy.sparse.csgraph import laplacian
+# EVIL UNMIXING CODE, PLEASE DONT TRY T0 UNDERSTAND JUST TRUST ME IT WORKS
 def graph_fclsu_admm(M       : np.ndarray,
                      X       : np.ndarray,
                      d_mtx : np.ndarray,
-                     d_max   : float,
-                     beta    : float,
+                     d_max   : float = 10.0,
+                     beta    : float = 0.01,
                      mu      : float = 1.0,
                      n_iters : int = 200,
                      eps_tol : float = 0.001):
@@ -229,7 +209,7 @@ def graph_fclsu_admm(M       : np.ndarray,
             M       - Known Endmember Spectra Matrix
             X       - Hyperspectral Image Matrix
             centers - Superpixel Centers
-            D_max   - Maximum Spatial Distance to be considered "similar"
+            d_max   - Maximum Spatial Distance to be considered "similar"
             beta    - Graph Regularization parameter
             mu      - ADMM convergence parameter
             eps_tol - convergence criteria
@@ -238,42 +218,40 @@ def graph_fclsu_admm(M       : np.ndarray,
         'loss':[],
         'primal_residual':[],
         'dual_residual':[],
+        'mean_abund_value':[],
         'n_iters':0
     }
 
     _, n_endmember = M.shape
     n_p = X.shape[1]
 
-    ### Initializations ###
+    ### Initializations
     U  = np.random.random((n_endmember, n_p))
-    V1 = M@(U.copy()) #np.random.random((n_band, n_p)) ## V1 = MU 
+    V1 = M@(U.copy())                               # np.random.random((n_band, n_p)) ## V1 = MU 
     V2 = U.copy()
     V3 = U.copy()
 
-    D1 = np.zeros_like(V1) # M@(U.copy()) ## V1 = MU
-    D2 = np.zeros_like(V2) #U.copy()
-    D3 = np.zeros_like(V3) #U.copy()
+    D1 = np.zeros_like(V1)                          # M@(U.copy()) ## V1 = MU
+    D2 = np.zeros_like(V2)                          # U.copy()
+    D3 = np.zeros_like(V3)                          # U.copy()
     
     ### Residuals for Tracking
     D1_prev = None
     D2_prev = None
     D2_prev = None
 
-    W = laplacian((d_mtx <= d_max).astype(int))
-    S, E, _ = np.linalg.svd(W) # w = S E S.T
+    W = sp.sparse.csgraph.laplacian((d_mtx <= d_max).astype(int))
+    S, E, _ = np.linalg.svd(W)                      # W = S@E@S.T
 
     partial_V2_update = np.linalg.inv(np.diag(E) + (mu/beta)*np.eye(n_p))
     partial_U_update = np.linalg.inv(M.T @ M + 2*np.eye(n_endmember))
 
     for k in range(n_iters):
-        if k%50 == 0:
-            print(k)
         ## U Update
         U = partial_U_update@(M.T@(V1 + D1) + (V2 + D2) + (V3 + D3))
         ## V1 Update
         V1 = (1/(1+mu))*(X + mu*(M@U - D1))
-        ## V2 Update (Soft Thresholding Operator)
-        #V2 = soft_threshold(U - D2, lambda_param/mu_param)
+        ## V2 Update
         V2 = (mu/beta)*(U - D2)@S@partial_V2_update@S.T
         ## V3 Update - Projection onto Delta
         V3 = convex_projection(U - D3)
@@ -287,13 +265,15 @@ def graph_fclsu_admm(M       : np.ndarray,
         D3 = D3 - U + V3
 
         loss = calculate_norm(M@U - X, p=2, q=2)**2 + np.trace(U@W@U.T)
-        primal_res = primal_residual_norm(M,U,V1,V2,V3)
-        dual_res = dual_residual_norm(mu, M, D1, D2, D3, D1_prev, D2_prev, D3_prev)
+        primal_res = np.sqrt(calculate_norm(M@U - V1)**2 + calculate_norm(U-V2)**2 + calculate_norm(U-V3)**2)
+        dual_res = mu*np.sqrt(calculate_norm(M.T@(D1 - D1_prev))**2 + calculate_norm(D2 - D2_prev)**2 + calculate_norm(D3 - D3_prev)**2)  
+        mean_abund_value = U.sum(axis = 0).mean()
 
         ## REPORTING ##
         history['loss'].append(loss) 
         history['primal_residual'].append(primal_res)
         history['dual_residual'].append(dual_res)
+        history['mean_abund_value'].append(mean_abund_value)
         history['n_iters'] += 1
 
     return U, history

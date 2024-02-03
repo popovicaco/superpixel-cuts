@@ -28,7 +28,7 @@ np.set_printoptions(suppress=True)
 
 ```python
 dataset_name = 'fields_data_2022'
-h5_import = h5py.File("data/bhsi_2023.h5",'r+').get('Cube/resultarray/inputdata')
+h5_import = h5py.File("data/bhsi_2022.h5",'r+').get('Cube/resultarray/inputdata')
 hyperspectral_cube = np.array(h5_import)
 hyperspectral_cube = np.moveaxis(np.array(hyperspectral_cube), [0], [2])
 hyperspectral_cube = np.moveaxis(np.array(hyperspectral_cube), [0], [1])
@@ -68,11 +68,11 @@ ax[1].set_title(f'Superpixeled Image n={len(np.unique(assignments))}', fontsize 
 ```
 
 ```python
-sigma_param = 0.005 # 0.1 -> 0.001           #0.01
-spatial_limit = 35# 15 -> 25 in steps of 5 #15
-spatial_beta_param = 0.025
-spatial_dmax_param = 10
-ne = 5#number of endmembers
+sigma_param = 0.01 # 0.1 -> 0.001           #0.01
+spatial_limit = 25# 15 -> 25 in steps of 5 #15
+spatial_beta_param = 0.025 #0.05
+spatial_dmax_param = 8
+ne = 6#number of endmembers
 
 superpixel_cluster_labels, mean_cluster_spectra, int_results = normalized_cuts.graph_regularized_ncuts_admm(data=hyperspectral_cube,
                                                                                                             superpixel_library=superpixel_library,
@@ -99,9 +99,9 @@ plt.imshow(labelled_img);
 ```
 
 ```python
-num_layers = min(int_results['abundance_results'].shape[2], 5)
+num_layers = min(int_results['abundance_results'].shape[2], 6)
 
-fig, axes = plt.subplots(1, num_layers, figsize=(5*num_layers, 5))
+fig, axes = plt.subplots(1, num_layers, figsize=(6*num_layers, 6))
 
 for i in range(num_layers):
     axes[i].imshow(int_results['abundance_results'][:, :, i], cmap='viridis')

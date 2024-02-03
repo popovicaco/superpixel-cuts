@@ -314,7 +314,7 @@ def graph_fclsu_admm_2(M       : np.ndarray,
                      centers : np.ndarray,
                      d_max   : float,
                      beta    : float,
-                     mu      : float = 1.0,
+                     mu      : float = 100,
                      n_iters : int = 200,
                      eps_tol : float = 0.001):
     '''
@@ -396,16 +396,20 @@ def graph_fclsu_admm_2(M       : np.ndarray,
 ```
 
 ```python
-abund_mtx, history = graph_fclsu_admm(layer_normalized_spectra,
+abund_mtx, history = graph_fclsu_admm_2(layer_normalized_spectra,
                                      superpixel_library,
                                      centers = centers,
                                      d_max = 10,
-                                     beta = 0.3,
+                                     beta = 0.05,
                                      mu = 1, #0.01
-                                     n_iters=200,  ## In practice, ASC constraint is held well when n_iters is high
+                                     n_iters=75,  ## In practice, ASC constraint is held well when n_iters is high
                                      eps_tol=0.01)
 
 abund_cube = create_cube(ASSIGNMENTS = assignments, ABUND= abund_mtx)
+```
+
+```python
+abund_cube.sum(axis = 2).mean()
 ```
 
 ```python

@@ -580,3 +580,94 @@ def single_ncuts_admm(data,
     mean_cluster_spectra = calc_mean_label_signatures(superpixel_library, superpixel_cluster_labels)
 
     return superpixel_cluster_labels, mean_cluster_spectra
+
+def create_cube(ASSIGNMENTS, ABUND):
+    nx, ny = ASSIGNMENTS.shape
+    ne, n_p = ABUND.shape
+    cube = np.zeros((nx, ny, ne))
+
+    for i in range(nx):
+        for j in range(ny):
+            for k in range(ne):
+                cube[i, j, k] = ABUND[k, ASSIGNMENTS[i, j]]
+
+    return cube
+
+def graph_regularized_ncuts_admm(data,
+                        superpixel_library,
+                        superpixel_centers,
+                        superpixel_assignments,
+                        n_endmembers,
+                        spectral_sigma2_param,
+                        spatial_kappa_param,
+                        spatial_dmax_param,
+                        spatial_beta_param,
+                        n_unmixing_iters = 100,
+                        spectral_metric = 'SAM'):
+    '''
+    Description:
+        Adaptive NCuts algorithm using Unmixing Information
+        i) Do the initial clustering
+        ii) Unmix using the extracted clusters as endmembers
+        iii) Concatenate unmixing information to the end of the hyperspectral cube
+        iv) Recreate the Superpixeled Cube with the new spectral information
+        v) Do the spectral clustering on the new superpixeled cube
+    ===========================================
+    Parameters:
+        data  
+        superpixel_library
+        superpixel_centers
+        superpixel_assignments
+        n_endmembers
+        spectral_sigma2_param
+        spectral_metric
+        spatial_kappa_param
+        spatial_dmax
+        spatial_beta_param
+    '''
+    nx, ny, nb = data.shape
+    hyperspectral_image = cube_to_matrix(data)
+    distance_mtx = calc_spatial_distance_mtx(superpixel_centers, 1, 1)
+    spatial_filter = (distance_mtx < spatial_kappa_param).astype(int) # gets cached
+    history = []
+    convergence_checks = []
+
+    ## Initial Normalized Cuts Segmentation
+    spectral_similarity_mtx = calc_spectral_similarity_mtx(superpixel_library, sigma2_param = spectral_sigma2_param, metric=spectral_metric)
+    spatial_spectral_matrix = spatial_filter * spectral_similarity_mtx
+    superpixel_cluster_labels = sklcluster.spectral_clustering(spatial_spectral_matrix, n_clusters=n_endmembers)
+    history.append(superpixel_cluster_labels)
+    ## Extract Mean Cluster Spectral Signatures
+    mean_cluster_spectra = calc_mean_label_signatures(superpixel_library, superpixel_cluster_labels)
+    print(f'Initial Clustering')
+
+    ## Unmix Original HSI using Mean Cluster Spectral Signatures
+    abund_mtx, history = graph_fclsu_admm(mean_cluster_spectra,
+                                          superpixel_library,
+                                            d_mtx = distance_mtx,
+                                            d_max = spatial_dmax_param, #10 
+                                            beta = spatial_beta_param,  #0.1
+                                            mu = 1, #0.01
+                                            n_iters = n_unmixing_iters,  ## In practice, ASC constraint is held well when n_iters is high
+                                            eps_tol = 0.01)
+    
+    abund_cube = create_cube(ASSIGNMENTS= superpixel_assignments, ABUND= abund_mtx)
+
+    intermediate_results = {"initial_labels" : superpixel_cluster_labels.copy(),
+                            "abundance_results" : abund_cube,
+                            "unmixing_history" : history}
+
+    # Concatenate Unmixing Results to Original HSI, then Superpixel using Old Assignments
+    abundance_plus_hyperspectral_cube = np.concatenate([data, abund_cube], axis = 2)
+    _, abundance_plus_superpixel_library = generate_SLIC_superpixels(abundance_plus_hyperspectral_cube, superpixel_assignments)
+    
+    # Cluster Signatures + Abundances using Normalized Cuts Segmentation
+    print(f'Spectral + Unmixing Clustering')
+    spectral_similarity_mtx = calc_spectral_similarity_mtx(abundance_plus_superpixel_library, sigma2_param = spectral_sigma2_param, metric='SAM')
+    spatial_spectral_matrix = spatial_filter * spectral_similarity_mtx
+    superpixel_cluster_labels = sklcluster.spectral_clustering(spatial_spectral_matrix, n_clusters=n_endmembers, random_state = 5)
+
+    ## Extract New Mean Cluster Spectral Signatures
+    mean_cluster_spectra = calc_mean_label_signatures(superpixel_library, superpixel_cluster_labels)
+
+    return superpixel_cluster_labels, mean_cluster_spectra, intermediate_results
