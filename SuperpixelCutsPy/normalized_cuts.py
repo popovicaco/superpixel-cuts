@@ -5,24 +5,6 @@ from .utility import *
 from .superpixel import *
 from .segmentation_evaluation import *
 
-def example_function():
-    '''
-    Description:
-        Put Description Here
-    ===========================================
-    Parameters:
-        data  
-        param1
-    ===========================================
-    Returns:
-        return_data 
-    ===========================================
-    References:
-        [1] Some Random Paper
-    '''
-    return 0
-
-
 def find_adjacent_labels(label, assignments):
     '''
     Description:
@@ -581,18 +563,6 @@ def single_ncuts_admm(data,
 
     return superpixel_cluster_labels, mean_cluster_spectra
 
-def create_cube(ASSIGNMENTS, ABUND):
-    nx, ny = ASSIGNMENTS.shape
-    ne, n_p = ABUND.shape
-    cube = np.zeros((nx, ny, ne))
-
-    for i in range(nx):
-        for j in range(ny):
-            for k in range(ne):
-                cube[i, j, k] = ABUND[k, ASSIGNMENTS[i, j]]
-
-    return cube
-
 def graph_regularized_ncuts_admm(data,
                         superpixel_library,
                         superpixel_centers,
@@ -635,7 +605,8 @@ def graph_regularized_ncuts_admm(data,
     ## Initial Normalized Cuts Segmentation
     spectral_similarity_mtx = calc_spectral_similarity_mtx(superpixel_library, sigma2_param = spectral_sigma2_param, metric=spectral_metric)
     spatial_spectral_matrix = spatial_filter * spectral_similarity_mtx
-    superpixel_cluster_labels = sklcluster.spectral_clustering(spatial_spectral_matrix, n_clusters=n_endmembers)
+    superpixel_cluster_labels = sklcluster.spectral_clustering(spatial_spectral_matrix,
+                                                               n_clusters=n_endmembers)
     history.append(superpixel_cluster_labels)
     ## Extract Mean Cluster Spectral Signatures
     mean_cluster_spectra = calc_mean_label_signatures(superpixel_library, superpixel_cluster_labels)
@@ -653,7 +624,7 @@ def graph_regularized_ncuts_admm(data,
     
     abund_cube = create_cube(ASSIGNMENTS= superpixel_assignments, ABUND= abund_mtx)
 
-    intermediate_results = {"initial_labels" : superpixel_cluster_labels.copy(),
+    intermediate_results = {"initial_labels" : assign_labels_onto_image(superpixel_assignments, superpixel_cluster_labels),
                             "abundance_results" : abund_cube,
                             "unmixing_history" : history}
 
@@ -669,5 +640,7 @@ def graph_regularized_ncuts_admm(data,
 
     ## Extract New Mean Cluster Spectral Signatures
     mean_cluster_spectra = calc_mean_label_signatures(superpixel_library, superpixel_cluster_labels)
+    #sd
+    labelled_img = assign_labels_onto_image(superpixel_assignments, superpixel_cluster_labels)
 
-    return superpixel_cluster_labels, mean_cluster_spectra, intermediate_results
+    return labelled_img, mean_cluster_spectra, intermediate_results 

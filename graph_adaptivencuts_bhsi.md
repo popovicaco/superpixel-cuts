@@ -48,7 +48,7 @@ original_hyperspectral_cube = preprocessing_pipeline.original_data.copy()
 
 ```python
 n_superpixels = 2500 #2500
-slic_m_param = 1    #2
+slic_m_param = 3    #2
 assignments, centers = superpixel.generate_SLIC_assignments(data = hyperspectral_cube,
                                                             n_superpixels = n_superpixels,
                                                             slic_m_param = slic_m_param)
@@ -68,34 +68,34 @@ ax[1].set_title(f'Superpixeled Image n={len(np.unique(assignments))}', fontsize 
 ```
 
 ```python
-sigma_param = 0.005 # 0.1 -> 0.001           #0.01
-spatial_limit = 35# 15 -> 25 in steps of 5 #15
+sigma_param = 0.0025
+spatial_limit = 30
 spatial_beta_param = 0.025
 spatial_dmax_param = 10
-ne = 5#number of endmembers
+ne = 5
 
-superpixel_cluster_labels, mean_cluster_spectra, int_results = normalized_cuts.graph_regularized_ncuts_admm(data=hyperspectral_cube,
-                                                                                                            superpixel_library=superpixel_library,
-                                                                                                            superpixel_centers=centers,
-                                                                                                            superpixel_assignments=assignments,
-                                                                                                            n_endmembers = ne,
-                                                                                                            spectral_sigma2_param= sigma_param,
-                                                                                                            spatial_kappa_param=spatial_limit,
-                                                                                                            spatial_beta_param= spatial_beta_param,
-                                                                                                            spatial_dmax_param = spatial_dmax_param,
-                                                                                                            n_unmixing_iters = 100,
-                                                                                                            spectral_metric='SAM')
+labelled_img, normalized_signatures, int_results = normalized_cuts.graph_regularized_ncuts_admm(data=hyperspectral_cube,
+                                                                                                superpixel_library=superpixel_library,
+                                                                                                superpixel_centers=centers,
+                                                                                                superpixel_assignments=assignments,
+                                                                                                n_endmembers = ne,
+                                                                                                spectral_sigma2_param= sigma_param,
+                                                                                                spatial_kappa_param=spatial_limit,
+                                                                                                spatial_beta_param= spatial_beta_param,
+                                                                                                spatial_dmax_param = spatial_dmax_param,
+                                                                                                n_unmixing_iters = 200,
+                                                                                                spectral_metric='SAM')
 
-labelled_img = normalized_cuts.assign_labels_onto_image(assignments, superpixel_cluster_labels)
-
-_, superpixel_original_library = superpixel.generate_SLIC_superpixels(data = original_hyperspectral_cube,
-                                                                      assignments = assignments)
+original_library  = segmentation_evaluation.calc_mean_label_signatures(utility.cube_to_matrix(original_hyperspectral_cube),
+                                                                        labelled_img.reshape(-1))
 
 #original_library = segmentation_evaluation.calc_mean_label_signatures(superpixel_original_library, superpixel_cluster_labels)
 ```
 
 ```python
-plt.imshow(labelled_img);
+fig, ax = plt.subplots(1,2, dpi=100);
+ax[0].imshow(hyperspectral_cube[:,:,layer_preview]);
+ax[1].imshow(labelled_img);
 ```
 
 ```python
@@ -111,6 +111,7 @@ for i in range(num_layers):
 ```python
 #dict_keys(['loss', 'primal_residual', 'dual_residual', 'mean_abund_value', 'n_iters'])
 view = 'mean_abund_value'
+plt.axhline(y=1, color='r', linestyle='--');
 plt.plot(int_results['unmixing_history'][view]);
 plt.title(view);
 ```
