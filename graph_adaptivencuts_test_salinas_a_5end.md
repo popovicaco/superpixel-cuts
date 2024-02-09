@@ -21,20 +21,23 @@ import numpy as np
 import matplotlib.pyplot as plt
 import h5py
 from SuperpixelCutsPy import *
+import scipy as sp
 # Configs for Notebooks
 plt.rcParams["figure.figsize"] = [9,7]
 np.set_printoptions(suppress=True)
 ```
 
 ```python
-dataset_name = 'fields_data_2022'
-h5_import = h5py.File("data/bhsi_2022.h5",'r+').get('Cube/resultarray/inputdata')
-hyperspectral_cube = np.array(h5_import)
-hyperspectral_cube = np.moveaxis(np.array(hyperspectral_cube), [0], [2])
-hyperspectral_cube = np.moveaxis(np.array(hyperspectral_cube), [0], [1])
-hyperspectral_cube = hyperspectral_cube[5:205, 5:205, :].copy()
-nx,ny,nb = hyperspectral_cube.shape
-del h5_import
+dataset_name = 'Salinas A'
+hyperspectral_cube = sp.io.loadmat("data/SalinasA_corrected.mat")['salinasA_corrected'] # Load Dataset
+ground_truth = sp.io.loadmat("data/SalinasA_gt.mat")['salinasA_gt']
+hyperspectral_cube = hyperspectral_cube[0:55,0:55,:]
+
+#hyperspectral_cube[12,14,:] = hyperspectral_cube[12,10,:]
+ground_truth = ground_truth[0:55,0:55]
+ground_truth = np.vectorize(lambda x: {0: 0, 1:1, 10:2, 11:3, 12:4, 13:5, 14:6}[x])(ground_truth)
+nx, ny, nb = hyperspectral_cube.shape
+print(hyperspectral_cube.shape)
 ```
 
 ```python
@@ -47,8 +50,8 @@ original_hyperspectral_cube = preprocessing_pipeline.original_data.copy()
 ```
 
 ```python
-n_superpixels = 2500 #2500
-slic_m_param = 1    #2
+n_superpixels = 250 #2500
+slic_m_param = 2  #2
 assignments, centers = superpixel.generate_SLIC_assignments(data = hyperspectral_cube,
                                                             n_superpixels = n_superpixels,
                                                             slic_m_param = slic_m_param)
@@ -61,18 +64,18 @@ n_superpixels = len(np.unique(assignments))
 fig, ax = plt.subplots(1,2, dpi=100);
 layer_preview = 20
 ax[0].imshow(hyperspectral_cube[:,:,layer_preview]);
-ax[1].imshow(superpixeled_cube[:,:,layer_preview])
-ax[1].scatter(centers[:,1], centers[:,0], c='white', s=0.1);
+ax[1].imshow(superpixeled_cube[:,:,layer_preview]);
+ax[1].scatter(centers[:,1], centers[:,0], c='white', s=0.3);
 ax[0].set_title(f'Original Image Layer {layer_preview}', fontsize = 8);
 ax[1].set_title(f'Superpixeled Image n={len(np.unique(assignments))}', fontsize = 8);
 ```
 
 ```python
-sigma_param = 0.01 # 0.1 -> 0.001           #0.01
+sigma_param = 0.005 # 0.1 -> 0.001           #0.01
 spatial_limit = 25# 15 -> 25 in steps of 5 #15
-spatial_beta_param = 0.025 #0.05
+spatial_beta_param = 0.005
 spatial_dmax_param = 10
-ne = 6#number of endmembers
+ne = 5#number of endmembers
 
 labelled_img, normalized_signatures, int_results = normalized_cuts.graph_regularized_ncuts_admm(data=hyperspectral_cube,
                                                                                                 superpixel_library=superpixel_library,
@@ -89,13 +92,14 @@ labelled_img, normalized_signatures, int_results = normalized_cuts.graph_regular
 original_library  = segmentation_evaluation.calc_mean_label_signatures(utility.cube_to_matrix(original_hyperspectral_cube),
                                                                         labelled_img.reshape(-1))
 
+#original_library = segmentation_evaluation.calc_mean_label_signatures(superpixel_original_library, superpixel_cluster_labels)
 ```
 
 ```python
 fig, ax = plt.subplots(1,3, dpi=150);
 ax[0].imshow(hyperspectral_cube[:,:,layer_preview]);
-ax[1].imshow(int_results['initial_labels']);
-ax[2].imshow(labelled_img);
+ax[1].imshow((int_results['initial_labels']+1)*(ground_truth != 0));
+ax[2].imshow((labelled_img+1)*(ground_truth != 0));
 
 ax[0].set_title("Original Image");
 ax[1].set_title("Initial Segmentation");
@@ -103,13 +107,14 @@ ax[2].set_title("Final Segmentation");
 ```
 
 ```python
-num_layers = min(int_results['abundance_results'].shape[2], 6)
+num_layers = min(int_results['abundance_results'].shape[2], ne)
 
-fig, axes = plt.subplots(1, num_layers, figsize=(6*num_layers, 6))
+fig, axes = plt.subplots(1, num_layers, figsize=(ne*num_layers, ne))
 
 for i in range(num_layers):
     axes[i].imshow(int_results['abundance_results'][:, :, i], cmap='viridis')
     axes[i].set_title(f'Initial Endmember {i+1}')
+
 ```
 
 ```python
@@ -118,4 +123,8 @@ view = 'mean_abund_value'
 plt.axhline(y=1, color='r', linestyle='--');
 plt.plot(int_results['unmixing_history'][view]);
 plt.title(view);
+```
+
+```python
+
 ```

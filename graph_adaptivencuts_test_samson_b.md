@@ -28,13 +28,14 @@ np.set_printoptions(suppress=True)
 ```
 
 ```python
-dataset_name = 'Salinas B'
-hyperspectral_cube = sp.io.loadmat("data/Salinas_corrected.mat")['salinas_corrected'][35:90,0:175,:] # Load Dataset
-ground_truth = sp.io.loadmat("data/Salinas_gt.mat")['salinas_gt'][35:90,0:175]
-#ground_truth = np.vectorize(lambda x: {0: 0, 4:1, 5:2, 6:3, 7:4, 8:5, 15:6}[x])(ground_truth)
-ground_truth = np.vectorize(lambda x: {0: 0, 4:1, 5:1, 6:2, 7:3, 8:4, 15:5}[x])(ground_truth)
-nx, ny, nb = hyperspectral_cube.shape
-print(hyperspectral_cube.shape)
+h5_import = h5py.File("data/samson_abc.h5",'r+').get('samson_b')
+hyperspectral_cube = np.array(h5_import)
+nx,ny,nb = hyperspectral_cube.shape
+del h5_import
+```
+
+```python
+plt.imshow(hyperspectral_cube[:,:,1]);
 ```
 
 ```python
@@ -47,8 +48,8 @@ original_hyperspectral_cube = preprocessing_pipeline.original_data.copy()
 ```
 
 ```python
-n_superpixels = 250 #2500
-slic_m_param = 2  #2
+n_superpixels = 1000 #2500
+slic_m_param = 3    #2
 assignments, centers = superpixel.generate_SLIC_assignments(data = hyperspectral_cube,
                                                             n_superpixels = n_superpixels,
                                                             slic_m_param = slic_m_param)
@@ -58,25 +59,21 @@ n_superpixels = len(np.unique(assignments))
 ```
 
 ```python
-plt.imshow(ground_truth)
-```
-
-```python
 fig, ax = plt.subplots(1,2, dpi=100);
 layer_preview = 20
 ax[0].imshow(hyperspectral_cube[:,:,layer_preview]);
-ax[1].imshow(superpixeled_cube[:,:,layer_preview]);
-ax[1].scatter(centers[:,1], centers[:,0], c='white', s=0.3);
+ax[1].imshow(superpixeled_cube[:,:,layer_preview])
+ax[1].scatter(centers[:,1], centers[:,0], c='white', s=0.1);
 ax[0].set_title(f'Original Image Layer {layer_preview}', fontsize = 8);
 ax[1].set_title(f'Superpixeled Image n={len(np.unique(assignments))}', fontsize = 8);
 ```
 
 ```python
-sigma_param = 0.05 # 0.1 -> 0.001           #0.01
-spatial_limit = 10# 15 -> 25 in steps of 5 #15
-spatial_beta_param = 0.025
-spatial_dmax_param = 10
-ne = 4#number of endmembers
+sigma_param = 0.015 # 0.1 -> 0.001           #0.01
+spatial_limit = 30# 15 -> 25 in steps of 5 #15
+spatial_beta_param = 0.005
+spatial_dmax_param =  spatial_limit #10
+ne = 3#number of endmembers
 
 labelled_img, normalized_signatures, int_results = normalized_cuts.graph_regularized_ncuts_admm(data=hyperspectral_cube,
                                                                                                 superpixel_library=superpixel_library,
@@ -97,20 +94,24 @@ original_library  = segmentation_evaluation.calc_mean_label_signatures(utility.c
 ```
 
 ```python
-fig, ax = plt.subplots(1,2, dpi=100);
+fig, ax = plt.subplots(1,3, dpi=150);
 ax[0].imshow(hyperspectral_cube[:,:,layer_preview]);
-ax[1].imshow((labelled_img+1)*(ground_truth != 0));
+ax[1].imshow(int_results['initial_labels']);
+ax[2].imshow(labelled_img);
+
+ax[0].set_title("Original Image");
+ax[1].set_title("Initial Segmentation");
+ax[2].set_title("Final Segmentation");
 ```
 
 ```python
-num_layers = min(int_results['abundance_results'].shape[2], 5)
+num_layers = min(int_results['abundance_results'].shape[2], ne)
 
-fig, axes = plt.subplots(1, num_layers, figsize=(5*num_layers, 5))
+fig, axes = plt.subplots(1, num_layers, figsize=(ne*num_layers, ne))
 
 for i in range(num_layers):
     axes[i].imshow(int_results['abundance_results'][:, :, i], cmap='viridis')
     axes[i].set_title(f'Initial Endmember {i+1}')
-
 ```
 
 ```python

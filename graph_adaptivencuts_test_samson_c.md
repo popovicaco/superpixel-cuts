@@ -21,20 +21,21 @@ import numpy as np
 import matplotlib.pyplot as plt
 import h5py
 from SuperpixelCutsPy import *
+import scipy as sp
 # Configs for Notebooks
 plt.rcParams["figure.figsize"] = [9,7]
 np.set_printoptions(suppress=True)
 ```
 
 ```python
-dataset_name = 'fields_data_2022'
-h5_import = h5py.File("data/bhsi_2022.h5",'r+').get('Cube/resultarray/inputdata')
+h5_import = h5py.File("data/samson_abc.h5",'r+').get('samson_c')
 hyperspectral_cube = np.array(h5_import)
-hyperspectral_cube = np.moveaxis(np.array(hyperspectral_cube), [0], [2])
-hyperspectral_cube = np.moveaxis(np.array(hyperspectral_cube), [0], [1])
-hyperspectral_cube = hyperspectral_cube[5:205, 5:205, :].copy()
 nx,ny,nb = hyperspectral_cube.shape
 del h5_import
+```
+
+```python
+plt.imshow(hyperspectral_cube[:,:,1]);
 ```
 
 ```python
@@ -47,8 +48,8 @@ original_hyperspectral_cube = preprocessing_pipeline.original_data.copy()
 ```
 
 ```python
-n_superpixels = 2500 #2500
-slic_m_param = 1    #2
+n_superpixels = 1000 #2500
+slic_m_param = 3    #2
 assignments, centers = superpixel.generate_SLIC_assignments(data = hyperspectral_cube,
                                                             n_superpixels = n_superpixels,
                                                             slic_m_param = slic_m_param)
@@ -68,11 +69,11 @@ ax[1].set_title(f'Superpixeled Image n={len(np.unique(assignments))}', fontsize 
 ```
 
 ```python
-sigma_param = 0.01 # 0.1 -> 0.001           #0.01
-spatial_limit = 25# 15 -> 25 in steps of 5 #15
-spatial_beta_param = 0.025 #0.05
-spatial_dmax_param = 10
-ne = 6#number of endmembers
+sigma_param = 0.015 # 0.1 -> 0.001           #0.01
+spatial_limit = 30# 15 -> 25 in steps of 5 #15
+spatial_beta_param = 0.005
+spatial_dmax_param =  spatial_limit #10
+ne = 3#number of endmembers
 
 labelled_img, normalized_signatures, int_results = normalized_cuts.graph_regularized_ncuts_admm(data=hyperspectral_cube,
                                                                                                 superpixel_library=superpixel_library,
@@ -89,6 +90,7 @@ labelled_img, normalized_signatures, int_results = normalized_cuts.graph_regular
 original_library  = segmentation_evaluation.calc_mean_label_signatures(utility.cube_to_matrix(original_hyperspectral_cube),
                                                                         labelled_img.reshape(-1))
 
+#original_library = segmentation_evaluation.calc_mean_label_signatures(superpixel_original_library, superpixel_cluster_labels)
 ```
 
 ```python
@@ -103,9 +105,9 @@ ax[2].set_title("Final Segmentation");
 ```
 
 ```python
-num_layers = min(int_results['abundance_results'].shape[2], 6)
+num_layers = min(int_results['abundance_results'].shape[2], ne)
 
-fig, axes = plt.subplots(1, num_layers, figsize=(6*num_layers, 6))
+fig, axes = plt.subplots(1, num_layers, figsize=(ne*num_layers, ne))
 
 for i in range(num_layers):
     axes[i].imshow(int_results['abundance_results'][:, :, i], cmap='viridis')
@@ -118,4 +120,8 @@ view = 'mean_abund_value'
 plt.axhline(y=1, color='r', linestyle='--');
 plt.plot(int_results['unmixing_history'][view]);
 plt.title(view);
+```
+
+```python
+
 ```

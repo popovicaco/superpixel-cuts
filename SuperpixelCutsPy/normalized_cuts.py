@@ -572,6 +572,7 @@ def graph_regularized_ncuts_admm(data,
                         spatial_kappa_param,
                         spatial_dmax_param,
                         spatial_beta_param,
+                        unmixing_mu_param = 1.0,
                         n_unmixing_iters = 100,
                         spectral_metric = 'SAM'):
     '''
@@ -618,7 +619,7 @@ def graph_regularized_ncuts_admm(data,
                                             d_mtx = distance_mtx,
                                             d_max = spatial_dmax_param, #10 
                                             beta = spatial_beta_param,  #0.1
-                                            mu = 1, #0.01
+                                            mu = unmixing_mu_param, #0.01
                                             n_iters = n_unmixing_iters,  ## In practice, ASC constraint is held well when n_iters is high
                                             eps_tol = 0.01)
     

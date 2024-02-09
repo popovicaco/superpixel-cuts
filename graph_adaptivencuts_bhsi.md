@@ -71,7 +71,7 @@ ax[1].set_title(f'Superpixeled Image n={len(np.unique(assignments))}', fontsize 
 sigma_param = 0.0025
 spatial_limit = 30
 spatial_beta_param = 0.025
-spatial_dmax_param = 10
+spatial_dmax_param = 10 #10
 ne = 5
 
 labelled_img, normalized_signatures, int_results = normalized_cuts.graph_regularized_ncuts_admm(data=hyperspectral_cube,
@@ -83,6 +83,7 @@ labelled_img, normalized_signatures, int_results = normalized_cuts.graph_regular
                                                                                                 spatial_kappa_param=spatial_limit,
                                                                                                 spatial_beta_param= spatial_beta_param,
                                                                                                 spatial_dmax_param = spatial_dmax_param,
+                                                                                                unmixing_mu_param = 1,
                                                                                                 n_unmixing_iters = 200,
                                                                                                 spectral_metric='SAM')
 
@@ -93,9 +94,14 @@ original_library  = segmentation_evaluation.calc_mean_label_signatures(utility.c
 ```
 
 ```python
-fig, ax = plt.subplots(1,2, dpi=100);
+fig, ax = plt.subplots(1,3, dpi=150);
 ax[0].imshow(hyperspectral_cube[:,:,layer_preview]);
-ax[1].imshow(labelled_img);
+ax[1].imshow(int_results['initial_labels']);
+ax[2].imshow(labelled_img);
+
+ax[0].set_title("Original Image");
+ax[1].set_title("Initial Segmentation");
+ax[2].set_title("Final Segmentation");
 ```
 
 ```python
@@ -110,7 +116,7 @@ for i in range(num_layers):
 
 ```python
 #dict_keys(['loss', 'primal_residual', 'dual_residual', 'mean_abund_value', 'n_iters'])
-view = 'mean_abund_value'
+view = 'primal_residual'
 plt.axhline(y=1, color='r', linestyle='--');
 plt.plot(int_results['unmixing_history'][view]);
 plt.title(view);
