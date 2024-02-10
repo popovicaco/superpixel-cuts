@@ -115,6 +115,11 @@ for i in range(num_layers):
 ```
 
 ```python
+plt.plot(original_library);
+plt.legend(np.arange(ne));
+```
+
+```python
 #dict_keys(['loss', 'primal_residual', 'dual_residual', 'mean_abund_value', 'n_iters'])
 view = 'primal_residual'
 plt.axhline(y=1, color='r', linestyle='--');
@@ -123,5 +128,40 @@ plt.title(view);
 ```
 
 ```python
+dataset_name = 'bhsi_1'
+savefigs = True
+if savefigs:
+    print("Saving Original Image")
+    utility.save_hcube(hyperspectral_cube = original_hyperspectral_cube,
+                       n_layers = 40,
+                       output_img=f'display_imgs/{dataset_name}_original.png');
 
+    print("Saving Preprocessed Results")
+    utility.save_hcube(hyperspectral_cube = hyperspectral_cube,
+                   n_layers = 40,
+                   output_img=f'display_imgs/{dataset_name}_preprocessed.png');
+
+    print("Saving Superpixel Results")
+    utility.save_hcube(hyperspectral_cube = superpixeled_cube,
+                   n_layers = 40,
+                   output_img=f'display_imgs/{dataset_name}_superpixeled.png');
+
+    print("Saving Abundance Results")
+    utility.save_hcube(hyperspectral_cube = int_results['abundance_results'],
+                   n_layers = ne,
+                   output_img=f'display_imgs/{dataset_name}_abundances.png');
+
+    print("Saving Abundance + Superpixel Results")
+    step_size = 4
+    utility.save_hcube(hyperspectral_cube = np.concatenate([superpixeled_cube[:,:,np.arange(0, nb, step_size)],
+                                                            int_results['abundance_results']], axis = 2),
+                      n_layers = np.arange(0, nb, step_size).shape[0] + ne,
+                      output_img=f'display_imgs/{dataset_name}_superpixel_plus_abudance.png');
+
+    print("Saving Segmentation Results")
+    utility.save_img(image = int_results['initial_labels'],
+                     output_img= f'display_imgs/{dataset_name}_initial_segmentation.png')
+
+    utility.save_img(image = labelled_img,
+                     output_img= f'display_imgs/{dataset_name}_final_segmentation.png')
 ```
