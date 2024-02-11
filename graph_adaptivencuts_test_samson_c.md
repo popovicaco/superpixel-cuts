@@ -115,6 +115,24 @@ for i in range(num_layers):
 ```
 
 ```python
+fig, ax = plt.subplots(2,4, figsize = (9,ne), dpi=150);
+for k in range(ne):
+    ax[0,k].set_title(f'Initial Segment {k+1}', fontsize = 6)
+    ax[0,k].imshow(int_results['initial_labels'] == k, cmap = 'gray');
+    ax[0,k].set_xticks([]);
+    ax[0,k].set_yticks([]);
+    ax[1,k].set_title(f'Segment {k+1} Normalized Signature', fontsize = 6);
+    ax[1,k].plot(int_results['initial_spectra'][:,k]);
+    ax[1,k].set_ylim(0,1);  
+plt.tight_layout();
+fig.text(0.5, 0, 'Band Index', fontsize = 8, ha='center')
+fig.text(0, 0.3, 'Reflectance Intensity', fontsize = 8, va='center', rotation='vertical')
+fig.patch.set_alpha(0);
+plt.savefig(f'test_initial_segmentation.png');
+
+```
+
+```python
 plt.plot(original_library);
 plt.legend(np.arange(ne));
 ```
@@ -122,7 +140,8 @@ plt.legend(np.arange(ne));
 ```python
 #dict_keys(['loss', 'primal_residual', 'dual_residual', 'mean_abund_value', 'n_iters'])
 view = 'mean_abund_value'
-plt.axhline(y=1, color='r', linestyle='--');
+plt.axhline(plt.plot(original_library);
+plt.legend(np.arange(ne));y=1, color='r', linestyle='--');
 plt.plot(int_results['unmixing_history'][view]);
 plt.title(view);
 ```
@@ -164,6 +183,23 @@ if savefigs:
 
     utility.save_img(image = labelled_img,
                      output_img= f'display_imgs/{dataset_name}_final_segmentation.png')
+    
+    fig, ax = plt.subplots(2,4, figsize = (9,ne), dpi=150);
+    for k in range(ne):
+        ax[0,k].set_title(f'Initial Segment {k+1}', fontsize = 6)
+        ax[0,k].imshow(int_results['initial_labels'] == k, cmap = 'gray');
+        ax[0,k].set_xticks([]);
+        ax[0,k].set_yticks([]);
+        ax[1,k].set_title(f'Segment {k+1} Normalized Signature', fontsize = 6);
+        ax[1,k].plot(int_results['initial_spectra'][:,k]);
+        ax[1,k].set_ylim(0,1);  
+    plt.tight_layout();
+    fig.text(0.5, 0, 'Band Index', fontsize = 8, ha='center')
+    fig.text(0, 0.3, 'Reflectance Intensity', fontsize = 8, va='center', rotation='vertical')
+    fig.patch.set_alpha(0);
+    plt.savefig(f'display_imgs/{dataset_name}_initial_segmentation_signatures.png');
+    plt.close();
+
 ```
 
 ```python

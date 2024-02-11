@@ -164,6 +164,59 @@ if savefigs:
 
     utility.save_img(image = labelled_img,
                      output_img= f'display_imgs/{dataset_name}_final_segmentation.png')
+    
+    fig, ax = plt.subplots(ne,2, figsize = (ne+2,2*ne), dpi=150);
+    for k in range(ne):
+        ax[k,0].set_title(f'Initial Segment {k+1}', fontsize = 6)
+        ax[k,0].imshow(int_results['initial_labels'] == k, cmap = 'gray');
+        ax[k,0].set_xticks([]);
+        ax[k,0].set_yticks([]);
+        ax[k,1].set_title(f'Segment {k+1} Normalized Signature', fontsize = 6);
+        ax[k,1].plot(int_results['initial_spectra'][:,k]);
+        ax[k,1].set_ylim(0,1);  
+    fig.text(0.7, 0, 'Band Index', fontsize = 8, ha='center')
+    fig.text(1, 0.5, 'Reflectance Intensity', fontsize = 8, va='center', rotation='vertical')
+    plt.tight_layout();
+    fig.patch.set_alpha(0);
+    plt.savefig(f'display_imgs/{dataset_name}_initial_segmentation_signatures.png', bbox_inches='tight');
+    plt.close();
+
+```
+
+```python
+    # fig, ax = plt.subplots(2,ne, figsize = (2*ne+1,ne), dpi=150);
+    # for k in range(ne):
+    #     ax[0,k].set_title(f'Initial Segment {k+1}', fontsize = 6)
+    #     ax[0,k].imshow(int_results['initial_labels'] == k, cmap = 'gray');
+    #     ax[0,k].set_xticks([]);
+    #     ax[0,k].set_yticks([]);
+    #     ax[1,k].set_title(f'Segment {k+1} Normalized Signature', fontsize = 6);
+    #     ax[1,k].plot(int_results['initial_spectra'][:,k]);
+    #     # ax[1,k].set_ylim(0,1);  
+    # plt.tight_layout();
+    # fig.text(0.5, 0, 'Band Index', fontsize = 8, ha='center')
+    # fig.text(0, 0.3, 'Reflectance Intensity', fontsize = 8, va='center', rotation='vertical')
+    # fig.patch.set_alpha(0);
+    # # plt.savefig(f'display_imgs/{dataset_name}_initial_segmentation_signatures.png');
+    # # plt.close();
+```
+
+```python
+fig, ax = plt.subplots(ne,2, figsize = (ne+2,2*ne), dpi=150);
+for k in range(ne):
+    ax[k,0].set_title(f'Initial Segment {k+1}', fontsize = 6)
+    ax[k,0].imshow(int_results['initial_labels'] == k, cmap = 'gray');
+    ax[k,0].set_xticks([]);
+    ax[k,0].set_yticks([]);
+    ax[k,1].set_title(f'Segment {k+1} Normalized Signature', fontsize = 6);
+    ax[k,1].plot(int_results['initial_spectra'][:,k]);
+    ax[k,1].set_ylim(0,1);  
+fig.text(0.7, 0, 'Band Index', fontsize = 8, ha='center')
+fig.text(1, 0.5, 'Reflectance Intensity', fontsize = 8, va='center', rotation='vertical')
+plt.tight_layout();
+fig.patch.set_alpha(0);
+plt.savefig(f'test.png', bbox_inches='tight');
+plt.close();
 ```
 
 ```python

@@ -626,6 +626,7 @@ def graph_regularized_ncuts_admm(data,
     abund_cube = create_cube(ASSIGNMENTS= superpixel_assignments, ABUND= abund_mtx)
 
     intermediate_results = {"initial_labels" : assign_labels_onto_image(superpixel_assignments, superpixel_cluster_labels),
+                            "initial_spectra": mean_cluster_spectra.copy(),
                             "abundance_results" : abund_cube,
                             "unmixing_history" : history}
 
