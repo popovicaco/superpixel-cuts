@@ -173,3 +173,4 @@ display_imgs/
 *.fls 
 *.synctex 
 *.toc
+*.synctex.gz
