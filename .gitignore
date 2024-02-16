@@ -166,3 +166,10 @@ cython_debug/
 test/
 data/
 display_imgs/
+
+*.aux
+*.bbl 
+*.fdb_latexmk 
+*.fls 
+*.synctex 
+*.toc

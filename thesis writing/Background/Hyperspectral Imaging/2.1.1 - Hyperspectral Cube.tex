@@ -1,0 +1,9 @@
+In traditional, RGB based imaging systems, an image can be represented by a three-dimensional tensor of shape $(n_x, n_y, 3)$, where the last dimension corresponds to the color channel the image was captured in.
+
+From a mathematical point of view, a hyperspectral image, denoted by $X$, is a tensor of shape $(n_x, n_y, n_b)$ with nonnegative entries. Formally, 
+
+$$X \in \mathbb{R}_{+}^{(n_x \times n_y \times n_b)}$$.
+
+Each pixel in the hyperspectral cube can be represented using a vector $x \in \mathbb{R}_+^{n_b}$. From a physical point point of view, the first two dimensions of $X$ form the image taken at a specific wavelength.
+ 
+

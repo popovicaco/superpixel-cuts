@@ -1,0 +1,155 @@
+\documentclass{article}
+\usepackage{graphicx} % Required for inserting images
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage[margin=1in]{geometry}
+
+
+% #############################################
+% 
+% 
+% 
+% 
+% 
+% #############################################
+\title{Adaptive Superpixel Cuts for Hyperspectral Images}
+\author{Aleksandar Popovic}
+\date{February 2024}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+    Blind segmentation in hyperspectral images is a challenging problem. Many traditional methods suffer from poor identification of materials and expensive computational costs, which can be partially eased by trading the accuracy with efficiency.
+
+    In this paper, we propose a novel graph-based algorithm for segmentation in hyperspectral images.     Utilizing the fact that pixels in a local region are likely to have similar spectral features, a pre-clustering algorithm is used to extract the homogenous regions, called superpixels. After extracting the superpixels, a weighted graph is constructed with the weights representing both the spectral similarity and spatial distance between each superpixel and its neighbors. The normalized graph cuts algorithm is then used to perform an initial segmentation of the image. To effectively extract the material information in the superpixels, the mean spectra in each segment is used to estimate the abundance of each endmember in each superpixel using a graph regularized hyperspectral unmixing algorithm. The resulting abundance information is used as a supportive feature, which when combined with the spectral features, form a new spectral feature vector for each superpixel. Using this new feature vector, the weighted graph is once again constructed and the normalized cuts algorithm is applied, resulting in a final segmentation of the image.
+
+    Experiments on a real hyperspectral datasets illustrate great potential of the proposed method in terms of accuracy and efficiency.
+\end{abstract}
+
+\clearpage
+% #############################################
+% 
+% 
+% 
+% 
+% 
+% #############################################
+\tableofcontents
+
+\clearpage
+% #############################################
+% 
+% 
+% 
+% 
+% 
+% #############################################
+\section{Introduction}
+
+\subsection{Motivations}
+
+\clearpage
+% #############################################
+% 
+% 
+% 
+% 
+% 
+% #############################################
+\section{Background}
+
+\subsection{Hyperspectral Imaging: Basics}
+\input{Background/Hyperspectral Imaging/2.1 - Basics}
+\subsubsection{The Hyperspectral Cube}
+\input{Background/Hyperspectral Imaging/2.1.1 - Hyperspectral Cube.tex}
+
+\clearpage
+\subsection{Superpixel Generation}
+\subsubsection{Simple Linear Iterative Clustering}
+
+\clearpage
+\subsection{Spectral Clustering}
+\subsubsection{The Laplacian Matrix}
+\subsubsection{Graph Cut Algorithms}
+
+\clearpage
+\subsection{Hyperspectral Unmixing}
+\subsubsection{Alternating Direction Method of Multipliers}
+\subsubsection{Global Variable Consensus Optimization using ADMM}
+\subsubsection{Abundance Estimation}
+\subsubsection{Solution Constraints and Regularization Terms}
+
+\clearpage
+% #############################################
+% 
+% 
+% 
+% 
+% 
+% #############################################
+\section{Adaptive Superpixel Cuts}
+
+\subsection{Dataset Preprocessing}
+\subsubsection{Singular Value Decomposition}
+\subsubsection{Layer Normalization}
+
+\clearpage
+\subsection{Algorithm Overview}
+\subsubsection{Superpixel Generation}
+\subsubsection{Construction of the Affinity Matrix $\mathbf{W}$}
+\subsubsection{Normalized Cuts Algorithm}
+\subsubsection{Graph Regularized Fully Constrained Unmixing}
+\subsubsection{Feature Vector Creation}
+\subsubsection{Parameter Selection}
+
+\clearpage
+% #############################################
+% 
+% 
+% 
+% 
+% 
+% #############################################
+\section{Experimental Results}
+
+\subsection{Implementation Details}
+
+\clearpage
+\subsection{Geospatial Testing Datasets}
+\subsubsection{Samson Datasets}
+\subsubsection{Salinas Datasets}
+
+\clearpage
+\subsection{Algorithm Evaluation}
+\subsubsection{Qualitative Evaluation on Samson}
+\subsubsection{Quantitative Evaluation on Salinas}
+
+\clearpage
+\subsection{Algorithm Comparison}
+
+\clearpage
+% #############################################
+% 
+% 
+% 
+% 
+% 
+% #############################################
+\section{Applications in Biomedical Imaging}
+
+\subsection{Dr Yucel Motivations}
+\subsection{Results on Biomedical Hyperspectral Images}
+
+\clearpage
+% #############################################
+% 
+% 
+% 
+% 
+% 
+% #############################################
+\section{Conclusions}
+
+\end{document}
