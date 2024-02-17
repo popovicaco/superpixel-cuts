@@ -174,3 +174,5 @@ display_imgs/
 *.synctex 
 *.toc
 *.synctex.gz
+
+method_comparison/
