@@ -1,9 +1,12 @@
-\documentclass{article}
+\documentclass[12pt]{article}
 \usepackage{graphicx} % Required for inserting images
 \usepackage{amsmath}
 \usepackage{amssymb}
 \usepackage[margin=1in]{geometry}
+\usepackage{algorithm2e}
 
+%############################ SETTINGS
+\RestyleAlgo{ruled}
 
 % #############################################
 % 
@@ -58,16 +61,17 @@
 % 
 % 
 % #############################################
-\section{Background}
-
-\subsection{Hyperspectral Imaging: Basics}
+\section{Background} \label{Background}
+\subsection{Hyperspectral Imaging: Basics} \label{Basics}
 \input{Background/Hyperspectral Imaging/2.1 - Basics}
-\subsubsection{The Hyperspectral Cube}
+\subsubsection{The Hyperspectral Cube} \label{Cube}
 \input{Background/Hyperspectral Imaging/2.1.1 - Hyperspectral Cube.tex}
 
 \clearpage
-\subsection{Superpixel Generation}
-\subsubsection{Simple Linear Iterative Clustering}
+\subsection{Superpixel Generation} \label{Superpixel}
+\input{Background/Hyperspectral Imaging/2.2 - Superpixel Generation}
+\subsubsection{Simple Linear Iterative Clustering} \label{SLIC}
+\input{Background/Hyperspectral Imaging/2.2.1 - Simple Linear Iterative Clustering}
 
 \clearpage
 \subsection{Spectral Clustering}
