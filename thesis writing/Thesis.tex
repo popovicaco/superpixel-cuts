@@ -8,10 +8,10 @@
 
 %############################ SETTINGS
 \RestyleAlgo{ruled}
-\pagestyle{fancy} % Apply headers to all pages
-\fancyhf{} % Clear all header and footer definitions
-\fancyhead[L]{\small Adaptive Superpixel Cuts for Hyperspectral Images}
-\fancyhead[R]{\small \thepage}
+% \pagestyle{fancy} % Apply headers to all pages
+% \fancyhf{} % Clear all header and footer definitions
+% % \fancyhead[L]{\small Adaptive Superpixel Cuts for Hyperspectral Images}
+% % \fancyhead[R]{\small \thepage}
 
 % #############################################
 % 
@@ -31,7 +31,7 @@
 \begin{abstract}
     Blind segmentation in hyperspectral images is a challenging problem. Many traditional methods suffer from poor identification of materials and expensive computational costs, which can be partially eased by trading the accuracy with efficiency.
 
-    In this paper, we propose a novel graph-based algorithm for segmentation in hyperspectral images.     Utilizing the fact that pixels in a local region are likely to have similar spectral features, a pre-clustering algorithm is used to extract the homogenous regions, called superpixels. After extracting the superpixels, a weighted graph is constructed with the weights representing both the spectral similarity and spatial distance between each superpixel and its neighbors. The normalized graph cuts algorithm is then used to perform an initial segmentation of the image. To effectively extract the material information in the superpixels, the mean spectra in each segment is used to estimate the abundance of each endmember in each superpixel using a graph regularized hyperspectral unmixing algorithm. The resulting abundance information is used as a supportive feature, which when combined with the spectral features, form a new spectral feature vector for each superpixel. Using this new feature vector, the weighted graph is once again constructed and the normalized cuts algorithm is applied, resulting in a final segmentation of the image.
+    In this paper, we propose a novel graph-based algorithm for segmentation in hyperspectral images. Utilizing the fact that pixels in a local region are likely to have similar spectral features, a pre-clustering algorithm is used to extract the homogenous regions, called superpixels. After extracting the superpixels, a weighted graph is constructed with the weights representing both the spectral similarity and spatial distance between each superpixel and its neighbors. The normalized graph cuts algorithm is then used to perform an initial segmentation of the image. To effectively extract the material information in the superpixels, the mean spectra in each segment is used to estimate the abundance of each endmember in each superpixel using a graph regularized hyperspectral unmixing algorithm. The resulting abundance information is used as a supportive feature, which when combined with the spectral features, form a new spectral feature vector for each superpixel. Using this new feature vector, the weighted graph is once again constructed and the normalized cuts algorithm is applied, resulting in a final segmentation of the image.
 
     Experiments on a real hyperspectral datasets illustrate great potential of the proposed method in terms of accuracy and efficiency.
 \end{abstract}
@@ -82,11 +82,11 @@
 \subsection{Hyperspectral Unmixing} \label{Unmixing Intro}
 \input{Background/Hyperspectral Unmixing/2.3 - Unmixing and AE.tex}
 \subsubsection{Linear Mixing Model}\label{LMM}
-\input{Background/Hyperspectral Unmixing/2.1.1 - Linear Mixing Model.tex}
-\subsubsection{Alternating Direction Method of Multipliers}\label{ADMM Intro}
-\subsubsection{Global Variable Consensus Optimization using ADMM}\label{Block ADMM}
+\input{Background/Hyperspectral Unmixing/2.3.1 - Linear Mixing Model.tex}
 \subsubsection{Abudance Estimation}\label{AE}
-\subsubsection{Solution Constraints and Regularization Terms}\label{Unmixing Addons}
+\input{Background/Hyperspectral Unmixing/2.3.2 - Abundance Estimation.tex}
+\subsubsection{Alternating Direction Method of Multipliers}\label{ADMM Intro}
+\subsubsection{ADMM Based Abundance Estimation}\label{Block ADMM}
 
 \clearpage
 \subsection{Spectral Clustering} \label{Spectral Clustering}
