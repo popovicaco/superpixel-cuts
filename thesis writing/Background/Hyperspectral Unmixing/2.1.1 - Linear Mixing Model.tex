@@ -1,0 +1,26 @@
+In reality, most pixels in a hyperspectral image capture a mixture of spectra reflected from various materials present within the spatial area, due to constraints with how large a spatial resolution can be acheived. 
+
+
+
+
+
+The foundational model behind hyperspectral unmixing is the linear mixing model, which dictates that spectra of every pixel $\mathbf{x} \in \mathbb{R}_+^{n_b}$ in a hyperspectral image is a linear combination of a set of $n_e$ spectra, $\mathbf{m} _1, \mathbf{m} _2, \cdots \mathbf{m} _{n_e} \in \mathbb{R}_+^{n_b}$, from pure representative materials, called endmembers, with weights $a_1, a_2, \cdots a_{n_e} \in \mathbb{R}$. Denoting $\mathbf{M} = [\mathbf{m} _1 | \mathbf{m} _2 | \cdots |\mathbf{m} _{n_e}] \in \mathbb{R}_+^{n_b \times n_e}$ and $\mathbf{a} = [a_1, a_2, \cdots ,a_{n_e}]^T \in \mathbb{R}^{n_e}$, the linear mixing model is formulated as follows:
+
+\begin{equation}
+    \label{lmm:model}
+    \mathbf{x} = \mathbf{M} \mathbf{a} + \mathbf{\epsilon}.
+\end{equation}
+
+While this model serves useful, there is no direct physical interpretation to the weights in $\mathbf{a}$, instead, we aim to estimate the physical proportion, called the abundance, of each endmember within each pixel by imposing two constraints on the entries in $\mathbf{a}$. The abundance nonnegativity constraint (ANC) requires that the entries in $\mathbf{a}$ must be greater than or equal to zero, while the abundance sum-to-one constraint (ASC) requires that the entries in $\mathbf{a}$ sum to $1$. Combining the two constraints, we have an extension of the linear mixing model
+
+\begin{equation}
+    \label{lmm:abund-lmm}
+    \mathbf{x} = \mathbf{M} \mathbf{a} + \mathbf{\epsilon} \quad \text{ s.t } \mathbf{a} \in \mathbb{R}_+^{n_e} \text{ and } \|\mathbf{a}\|_1 = 1.
+\end{equation}
+
+The linear mixing model can be additionally be extended from a per pixel basis onto a collection of $n_p$ pixels $\mathbf{X} = [\mathbf{x}_1 | \mathbf{x}_2 | \cdots | \mathbf{x}_{n_p}] \in \mathbb{R}_ +^{n_b \times n_p}$, with each pixel $\mathbf{x}_i$ having a corresponding abundance vector $\mathbf{a}_i$. Arranging the abundance vectors into an abudance matrix $\mathbf{A} = [\mathbf{a}_1 | \mathbf{a}_2 | \cdots | \mathbf{a}_{n_p}] \in \mathbb{R}^{n_e \times n_p}$ and applying the ASC-ANC constraint, we have the extension of the linear mixing model to a collection of pixels that will be used for the following sections
+
+\begin{equation}
+    \label{lmm:abund-lmm-collection}
+    \mathbf{X} = \mathbf{M} \mathbf{A} + \epsilon \quad \text{ s.t } \mathbf{a_i} \in \mathbb{R}_+^{n_e} \text{ and } \|\mathbf{a_i}\|_1 = 1.
+\end{equation}
