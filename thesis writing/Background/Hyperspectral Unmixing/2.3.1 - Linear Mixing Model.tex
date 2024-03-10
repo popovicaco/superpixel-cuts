@@ -20,11 +20,11 @@ While this model serves useful, there is no direct physical interpretation to th
     \mathbf{x} = \mathbf{M} \mathbf{a} + \mathbf{\epsilon} \quad \text{ s.t } \mathbf{a} \in \mathbb{R}_+^{n_e} \text{ and } \|\mathbf{a}\|_1 = 1.
 \end{equation}
 
-The linear mixing model can be additionally be extended from a per pixel basis onto a collection of $n_p$ pixels $\mathbf{X} = [\mathbf{x}_1 | \mathbf{x}_2 | \cdots | \mathbf{x}_{n_p}] \in \mathbb{R}_ +^{n_b \times n_p}$, with each pixel $\mathbf{x}_i$ having a corresponding abundance vector $\mathbf{a}_i$. Arranging the abundance vectors into an abudance matrix $\mathbf{A} = [\mathbf{a}_1 | \mathbf{a}_2 | \cdots | \mathbf{a}_{n_p}] \in \mathbb{R}^{n_e \times n_p}$ and applying the ASC-ANC constraint, we have the extension of the linear mixing model to a collection of pixels that will be used for the following sections
+The linear mixing model can be additionally be extended from a per pixel basis onto a collection of $n_p$ pixels $\mathbf{X} = [\mathbf{x}_1 | \mathbf{x}_2 | \cdots | \mathbf{x}_{n_p}] \in \mathbb{R}_ +^{n_b \times n_p}$, with each pixel $\mathbf{x}_i$ having a corresponding abundance vector $\mathbf{a}_i$. Arranging the abundance vectors into an abudance matrix $\mathbf{A} = [\mathbf{a}_1 | \mathbf{a}_2 | \cdots | \mathbf{a}_{n_p}] \in \mathbb{R}^{n_e \times n_p}$, we denote the ANC-ASC constraint using the set $ \Delta = \{ \mathbf{A} \in \mathbb{R}_+^{n_e \times n_p} \mid \mathbf{1}_{n_e}^T \mathbf{A} = \mathbf{1}_{n_p}\} $. This new extension of the linear mixing model to a collection of pixels that will be used for the following sections
 
 \begin{equation}
     \label{lmm:abund-lmm-collection}
-    \mathbf{X} = \mathbf{M} \mathbf{A} + \epsilon \quad \text{ s.t } \mathbf{a_i} \in \mathbb{R}_+^{n_e} \text{ and } \|\mathbf{a_i}\|_1 = 1.
+    \mathbf{X} = \mathbf{M} \mathbf{A} + \epsilon \quad \text{ s.t } \mathbf{A} \in \Delta
 \end{equation}
 
 The linear mixing model is an objectively simple model, which enforces a linear relationship between the spatial mixing of endmembers through assuming that pixels lie on a flat plane. This is almost never the case, however the model remains a efficient and powerful tool for extracting spectral information from a scene. 
