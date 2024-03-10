@@ -4,7 +4,7 @@ The task is referred to as abundance estimation and continues to be an active ar
 
 \begin{equation}
     \label{ae:fnorm}
-    \mathcal{L}(\mathbf{X},\tilde{\mathbf{X}}) = \sum_{i=1}^{n_b} \sum_{j=1}^{n_p} \left(\mathbf{x}_{(i,j)} - \tilde{\mathbf{x}}_{(i,j)}\right)^2 = \|\tilde{\mathbf{X}} - \mathbf{X}\|_F^2
+    \mathcal{L}(\mathbf{X},\tilde{\mathbf{X}}) = \sum_{i=1}^{n_b} \sum_{j=1}^{n_p} \left(\mathbf{x}_{(i,j)} - \tilde{\mathbf{x}}_{(i,j)}\right)^2 = \|\tilde{\mathbf{X}} - \mathbf{X}\|_F^2.
 \end{equation}
 
 The least-squares reconstruction error can alternatively be written as the squared Frobenius norm, denoted as $\|\cdot\|_F^2$, of the difference between  $\tilde{\mathbf{X}}$ and $\mathbf{X}$. This choice of $\mathcal{L}$ is the straightforward approach as $\mathcal{L}$ is both convex and differentiable, with the additional properties that $\mathcal{L}(\tilde{\mathbf{X}},\mathbf{X}) = \mathcal{L}(\mathbf{X},\tilde{\mathbf{X}})$ and $ \mathcal{L}(\mathbf{X},\tilde{\mathbf{X}}) = \mathcal{L}(\mathbf{X}^T,\tilde{\mathbf{X}^T})$ [REF].
@@ -13,18 +13,18 @@ To incorporate the ANC-ASC constraint into the overall formulation of $\mathcal{
 
 \begin{equation}
     \label{ae:indfunc}
-    \chi_{\Delta}(x) = 
+    \chi_{S}(x) = 
             \begin{cases}
             0 &\text{if } x \in S \\
-            \infty &\text{if } x \not \in S
+            \infty &\text{if } x \not \in S.
             \end{cases}
 \end{equation}
 
-Adding $\chi_\Delta$ in the formulation of $\mathcal{L}$ restricts the values $\mathbf{A}$ can take on to the set $\Delta$, while ensuring that the overall formulation still has a global minimum. Additionally, a regularization term $J$ can be added to impose other constraints on the values in $\mathbf{A}$. Later sections operate on the assumption that $J$ is also convex. Formally, abudance estimation can be formualated as a convex optimization problem of the form
+Adding $\chi_\Delta$ in the formulation of $\mathcal{L}$ restricts the values $\mathbf{A}$ can take on to the set $\Delta$ while ensuring that the overall formulation still has a global minimum within $\Delta$. Additionally, a regularization term $J$ can be added to impose other constraints on the values in $\mathbf{A}$. Later sections operate on the assumption that $J$ is also convex. Formally, abudance estimation can be formualated as a convex optimization problem of the form
 
 \begin{equation}
     \label{ae:ae-min-1}
-    A = \argmin_{A \in \mathbb{R}^{n_e \times n_p}} \frac{1}{2}\|\mathbf{MA} - \mathbf{X}\|_F^2 + \chi_\Delta(\mathbf{A}) + J(\mathbf{A})
+    A = \argmin_{A \in \mathbb{R}^{n_e \times n_p}} \frac{1}{2}\|\mathbf{MA} - \mathbf{X}\|_F^2 + \chi_\Delta(\mathbf{A}) + J(\mathbf{A}).
 \end{equation}
 
-This problem has no closed form solution, relying on iterative methods or applying solvers like GUROBI or CVXOPT to solve the problem for individual pixels given the problem can be split pixelwise. The formulation of the abundance estimation allows for flexibility in choice of $\mathcal{L}$. There is particular interest in choosing $\mathcal{L}$ such that it is convex and differentiable, in order to apply gradient-based methods to estimate the abundance matrix, however there exist approaches that choose rely on divergence-based metrics [REF].
+This problem has no closed form solution, relying on iterative methods or applying solvers like GUROBI [REF] or CVXOPT [REF] to solve the problem for individual pixels given the problem can be split pixelwise. The formulation of the abundance estimation allows for flexibility in choice of $\mathcal{L}$. There is particular interest in choosing $\mathcal{L}$ such that it is convex and differentiable, in order to apply gradient-based methods to estimate the abundance matrix, however there exist approaches that choose rely on divergence-based or non differentiable metrics [REF].
