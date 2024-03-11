@@ -24,7 +24,7 @@ Adding $\chi_\Delta$ in the formulation of $\mathcal{L}$ restricts the values $\
 
 \begin{equation}
     \label{ae:ae-min-1}
-    A = \argmin_{A \in \mathbb{R}^{n_e \times n_p}} \frac{1}{2}\|\mathbf{MA} - \mathbf{X}\|_F^2 + \chi_\Delta(\mathbf{A}) + J(\mathbf{A}).
+    \mathbf{A} = \argmin_{\mathbf{A} \in \mathbb{R}^{n_e \times n_p}} \frac{1}{2}\|\mathbf{MA} - \mathbf{X}\|_F^2 + \chi_\Delta(\mathbf{A}) + J(\mathbf{A}).
 \end{equation}
 
 This problem has no closed form solution, relying on iterative methods or applying solvers like GUROBI [REF] or CVXOPT [REF] to solve the problem for individual pixels given the problem can be split pixelwise. The formulation of the abundance estimation allows for flexibility in choice of $\mathcal{L}$. There is particular interest in choosing $\mathcal{L}$ such that it is convex and differentiable, in order to apply gradient-based methods to estimate the abundance matrix, however there exist approaches that choose rely on divergence-based or non differentiable metrics [REF].

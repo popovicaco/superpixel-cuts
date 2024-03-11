@@ -14,9 +14,8 @@ After initialization, a modified distance measure is proposed to enforce color s
 
 Each pixel is the image is associated with the nearest cluster whose search area overlaps this pixel. After all pixels are associated with a cluster, a new center is computed as the average feature vector of all the pixels belonging to the cluster. This is repeated for a set number of iterations. After exhausting all iterations, a final step is performed by relabelling disjoint segments with the labels of the largest neighboring cluster. This step is optional as disjoint segments tend to not occur for larger inputs of $n_s$ and $m$.
 
-\begin{algorithm}
+\begin{algorithm}[H]
     \caption{SLIC Superpixel Algorithm}
-    
     \textbf{Input}: $\mathbf{X}_f$, $m > 0$, $n_s > 0$, $n_{\text{iters}} > 0$
 
     \textbf{Initialize:} $\mathbf{C}_n = [\mathbf{c}_{l}, \mathbf{c}_{a}, \mathbf{c}_{b}, i, j]$ where $n = 1, \cdots, n_s$ by sampling pixels at regular grid intervals $S$. Perturb cluster centers to lowest gradient position in a $3 \times 3$ neighborhood according to \eqref{eq:slic-gradient} \\

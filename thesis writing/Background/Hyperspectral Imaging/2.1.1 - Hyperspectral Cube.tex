@@ -1,6 +1,6 @@
 In traditional, RGB based imaging systems, an image can be represented by a 3-dimensional tensor of shape $(n_x, n_y, 3)$, where the last dimension corresponds to the color channel the image was captured in. From a mathematical point of view, a hyperspectral image, denoted by $\mathbf{X}$, is a tensor of shape $(n_x, n_y, n_\lambda)$ with nonnegative entries. Each pixel in the tensor is represented using a vector $\mathbf{x} \in \mathbb{R}_+^{n_\lambda}$. From a physical point of view, the first two dimensions in $\mathbf{X}$ represent the spatial coordinates  of the pixels, while the last dimension represents the specific wavelength band the spectral intensity, reflectance or transmittance measurements were taken at.
 
-The tensor $\mathbf{X}$ can be transformed into a two-dimensional matrix of shape $(n_p, n_\lambda)$, denoted $\mathbf{X}_f$, where $n_p = n_x n_y$ is the total number of pixels in the image, with each column representing the pixel at index $(i,j)$ in $\mathbf{X}$, arranged across the first spectral dimension, then the second. Formally, $
-\mathbf{X}_f = \left[ \mathbf{x}_{(0,0)},  \cdots, \mathbf{x}_{(n_x,0)}, \cdots, \mathbf{x}_{(0,n_y)}, \cdots, \mathbf{x}_{(n_x, n_y)} \right]. 
-$
+The tensor $\mathbf{X}$ can be transformed into a two-dimensional matrix of shape $(n_p, n_\lambda)$, denoted $\mathbf{X}_f$, where $n_p = n_x n_y$ is the total number of pixels in the image, with each column representing the pixel at index $(i,j)$ in $\mathbf{X}$, arranged across the first spectral dimension, then the second. Formally, $$
+\mathbf{X}_f = \left[ \mathbf{x}_{(0,0)},  \cdots, \mathbf{x}_{(n_x,0)}, \cdots, \mathbf{x}_{(0,n_y)}, \cdots, \mathbf{x}_{(n_x, n_y)} \right].
+$$
 

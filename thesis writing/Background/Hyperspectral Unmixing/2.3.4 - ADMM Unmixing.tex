@@ -3,31 +3,21 @@ In Section \ref{AE}, the abundance estimation problem for a collection of pixels
 \begin{equation*}
     A = \argmin_{A \in \mathbb{R}^{n_e \times n_p}} \frac{1}{2}\|\mathbf{MA} - \mathbf{X}\|_F^2 + \chi_\Delta(\mathbf{A}) + J(\mathbf{A}).
 \end{equation*}
+The goal of this section is to demonstrate how this problem can be equivalently represented in a form where the alternating direction method of multipliers technique can be applied. The abundance estimation problem when one or more than one regularization terms are added belongs to a class of problems called global consensus optimization problems shown in Boyd et al. [REF]
 
-The goal of this section is to demonstrate how this problem can be equivalently represented in a form where ADMM can directly be applied. The section itself operates under the assumption that $J$ is a convex function, for nonconvex choices of $J$, convergence is not guarenteed. The approach to transforming \eqref{ae:ae-min-1} is to first introduce matrices $\mathbf{U} \in \mathbb{R}^{n_e \times n_p}$, $\mathbf{V}_1 \in \mathbb{R}^{n_b \times n_p}$, $\mathbf{V}_2 \in \mathbb{R}^{n_e \times n_p}$, and $\mathbf{V}_{3} \in \mathbb{R}^{n_e \times n_p}$ and rewrite the problem into the equivalent form 
+Operating under the assumption that $J$ is a convex function, since for nonconvex choices of $J$, convergence is not guarenteed. The approach to transforming \eqref{ae:ae-min-1} is to first introduce matrices $\mathbf{U} \in \mathbb{R}^{n_e \times n_p}$, $\mathbf{V}_1 \in \mathbb{R}^{n_b \times n_p}$, $\mathbf{V}_2 \in \mathbb{R}^{n_e \times n_p}$, and $\mathbf{V}_{3} \in \mathbb{R}^{n_e \times n_p}$ and rewrite as follows:
 \begin{equation}
     \label{ae:equivalent-admm-1}
     \begin{aligned}
-        \underset{\mathbf{U}, \mathbf{V}_1, \mathbf{V}_2, \mathbf{V}_2}{\textbf{minimize }} & \frac{1}{2} \|\mathbf{V}_1 - X \|_F^2 + \chi_{\Delta}(\mathbf{V}_2) + J(\mathbf{V}_3) 
+        \underset{\mathbf{U}, \mathbf{V}_1, \mathbf{V}_2, \mathbf{V}_3}{\text{minimize }} & \quad \frac{1}{2} \|\mathbf{V}_1 - X \|_F^2 + \chi_{\Delta}(\mathbf{V}_2) + J(\mathbf{V}_3) 
         \\         
-        \textbf{subject to } & \mathbf{V}_1 = \mathbf{MU} \\
-        &\mathbf{V}_2 = \mathbf{U} \\
-        &\mathbf{V}_{3} = \mathbf{U}.
+        \text{subject to } &  \quad \mathbf{V}_1 = \mathbf{MU} \\
+        & \quad \mathbf{V}_2 = \mathbf{U} \\
+        & \quad \mathbf{V}_{3} = \mathbf{U}
    \end{aligned}
 \end{equation}
-Further rewriting the problem, the application of ADMM can clearly be seen:
-\begin{equation}
-    \label{ae:equivalent-admm-2}
-    \begin{aligned}
-        \underset{\mathbf{U},\mathbf{V}}{\textbf{minimize }} & g(\mathbf{V})
-        \\         
-        \textbf{subject to } & \mathbf{GU} + \mathbf{BV} = \mathbf{0}
-   \end{aligned}
-\end{equation}
-where 
-$
-g(\mathbf{V}) = \frac{1}{2} \|\mathbf{V}_1 - X \|_F^2 + \chi_{\Delta}(\mathbf{V}_2) + J(\mathbf{V}_3) 
-$, 
+where
+$$g(\mathbf{V}) = \frac{1}{2} \|\mathbf{V}_1 - X \|_F^2 + \chi_{\Delta}(\mathbf{V}_2) + J(\mathbf{V}_3)$$
 $$
 \mathbf{V} = \begin{bmatrix}
 \mathbf{V}_1 &  &   \\
@@ -49,5 +39,178 @@ $$
 &  & -\mathbf{I} \\
 \end{bmatrix}.
 $$
+The problem depicted in \eqref{ae:equivalent-admm-1} can then be rewritten in equivalent form:
+\begin{equation}
+    \label{ae:equivalent-admm-2}
+    \begin{aligned}
+        \underset{\mathbf{U},\mathbf{V}}{\text{minimize }} & \quad g(\mathbf{V})
+        \\         
+        \text{subject to } &  \quad \mathbf{GU} + \mathbf{BV} = \mathbf{0}
+   \end{aligned}
+\end{equation}
+The scaled augmented lagrangian $\mathcal{L}_\mu$ with parameter $\mu > 0$ and scaled dual variable $\mathbf{D}$ is then given as:
+\begin{equation}
+  \label{admm:lagrangian-ae}
+  \mathcal{L}_{\mu}(\mathbf{U}, \mathbf{V}, \mathbf{D}) = g(\mathbf{V}) + \frac{\mu}{2} \|\mathbf{GU} + \mathbf{BV} - \mathbf{D}\|_F^2
+\end{equation}
+where
+$$
+\mathbf{D} = 
+\begin{bmatrix}
+\mathbf{D}_1 &  &  \\
+  &\mathbf{D}_2&  \\
+&  & \mathbf{D}_3 \\
+\end{bmatrix}.
+$$
+ADMM aims to minimize scaled form of $\mathcal{L}_{\mu}$ by alternating minimizations with respect to $\mathbf{U}$, $\mathbf{V}$, and $\mathbf{D}$ by performing the following updates:
+\begin{equation}
+  \label{admm:ae-updates}
+  \begin{aligned}
+    \mathbf{U}^{(k+1)} &= \argmin_{\mathbf{U}}  \frac{\mu}{2} \|\mathbf{GU} + \mathbf{BV}^{(k)} - \mathbf{D}^{(k)}\|_F^2 \\
+    \mathbf{V}^{(k+1)} &= \argmin_{\mathbf{V}} g(\mathbf{V}) + \frac{\mu}{2} \|\mathbf{GU}^{(k+1)} + \mathbf{BV} - \mathbf{D}^{(k)}\|_F^2 \\
+    \mathbf{D}^{(k+1)} &= \mathbf{D}^{(k)} - \mathbf{GU}^{(k+1)} - \mathbf{BV}^{(k+1)}.
+    \end{aligned}
+\end{equation}
 
-With parameter $\mu > 0$, the augmented lagrangian $\mathcal{L}_\mu$ for the abundance estimation problem 
+While the updates are in a simpler format, further work needs to be done to derive updates for $\mathbf{V}$. Looking at the $\|\mathbf{GU} + \mathbf{BV}^{(k)} - \mathbf{D}^{(k)}\|_F^2$ term in \eqref{admm:lagrangian-ae}, the structure of it's components give leeway to splitting the term into individual components, notably
+\begin{equation*}
+  \begin{aligned}
+    \|\mathbf{GU} + \mathbf{BV} - \mathbf{D}\|_F^2 &= 
+    \left\lVert
+    \begin{bmatrix}
+    \mathbf{MU} - \mathbf{V}_1 - \mathbf{D}_1 &  &  \\
+      &\mathbf{U} - \mathbf{V}_2 - \mathbf{D}_2&  \\
+    &  & \mathbf{U} - \mathbf{V}_3 - \mathbf{D}_3 \\
+    \end{bmatrix}
+    \right\rVert^2_F \\
+    &= \|\mathbf{MU} - \mathbf{V}_1 - \mathbf{D}_1\|_F^2 +
+       \|\mathbf{U} - \mathbf{V}_2 - \mathbf{D}_2\|_F^2 +
+       \|\mathbf{U} - \mathbf{V}_3 - \mathbf{D}_3\|_F^2.
+  \end{aligned}
+\end{equation*}
+Applying this expansion, the updates in \eqref{admm:ae-updates} can be rewritten. The $\mathbf{U}$ update becomes
+\begin{equation}
+  \label{admm:ae-updates-u}
+  \begin{aligned}
+    \mathbf{U}^{(k+1)} = \argmin_{\mathbf{U}}  & 
+    \frac{\mu}{2} \|\mathbf{MU} - \mathbf{V}_1^{(k)} - \mathbf{D}_1^{(k)}\|_F^2 \\
+    & + \frac{\mu}{2} \|\mathbf{U} - \mathbf{V}_2^{(k)} - \mathbf{D}_2^{(k)}\|_F^2 \\
+    & + \frac{\mu}{2} \|\mathbf{U} - \mathbf{V}_3^{(k)} - \mathbf{D}_3^{(k)}\|_F^2.
+  \end{aligned}
+\end{equation}
+Under the same expansion, the $\mathbf{V}$ update becomes
+\begin{equation*}
+  \begin{aligned}
+    \mathbf{V}^{(k+1)} = \argmin_{\mathbf{V}}  &  \frac{1}{2} \|\mathbf{V}_1 - X \|_F^2 + \chi_{\Delta}(\mathbf{V}_2) + J(\mathbf{V}_3) \\ 
+    & + \frac{\mu}{2} \|\mathbf{MU}^{(k+1)} - \mathbf{V}_1 - \mathbf{D}_1^{(k)}\|_F^2 \\
+    & + \frac{\mu}{2} \|\mathbf{U}^{(k+1)} - \mathbf{V}_2 - \mathbf{D}_2^{(k)}\|_F^2 \\
+    & + \frac{\mu}{2} \|\mathbf{U}^{(k+1)} - \mathbf{V}_3 - \mathbf{D}_3^{(k)}\|_F^2.
+  \end{aligned}
+\end{equation*}
+Furthermore, each component of the update for $\mathbf{V}$ can be split into individual updates for $\mathbf{V}_1$, $\mathbf{V}_2$ and $\mathbf{V}_3$:
+\begin{equation}
+  \label{admm:ae-updates-v}
+  \begin{aligned}
+    \mathbf{V}_1^{(k+1)} &= \argmin_{\mathbf{V}_1} \frac{1}{2} \|\mathbf{V}_1 - X \|_F^2 + \frac{\mu}{2} \|\mathbf{MU}^{(k+1)} - \mathbf{V}_1 - \mathbf{D}_1^{(k)}\|_F^2 \\
+    \mathbf{V}_2^{(k+1)} &= \argmin_{\mathbf{V}_2} \chi_{\Delta}(\mathbf{V}_2) + \frac{\mu}{2} \|\mathbf{U}^{(k+1)} - \mathbf{V}_2 - \mathbf{D}_2^{(k)}\|_F^2 \\
+    \mathbf{V}_3^{(k+1)} &= \argmin_{\mathbf{V}_3} J(\mathbf{V}_3) + \frac{\mu}{2} \|\mathbf{U}^{(k+1)} - \mathbf{V}_3 - \mathbf{D}_3^{(k)}\|_F^2
+  \end{aligned}
+\end{equation}
+Lastly, in similar fashion to $\mathbf{V}$, the $\mathbf{D}$ update in \eqref{admm:ae-updates} can also be split component wise:
+\begin{equation}
+  \label{admm:ae-updates-d}
+  \begin{aligned}
+    \mathbf{D}_1^{(k+1)} &= \mathbf{D}_1^{(k)} - \mathbf{MU}^{(k+1)} + \mathbf{V}_1^{(k+1)} \\
+    \mathbf{D}_2^{(k+1)} &= \mathbf{D}_2^{(k)} - \mathbf{U}^{(k+1)} + \mathbf{V}_2^{(k+1)} \\
+    \mathbf{D}_3^{(k+1)} &= \mathbf{D}_3^{(k)} - \mathbf{U}^{(k+1)} + \mathbf{V}_3^{(k+1)}.
+  \end{aligned}
+\end{equation}
+Taking into account \eqref{admm:ae-updates-u}, \eqref{admm:ae-updates-v}, \eqref{admm:ae-updates-d}, the updates in \eqref{admm:ae-updates} can finally be rewritten in the expanded form as:
+\begin{equation}
+  \label{admm:ae-updates-final}
+  \begin{aligned}
+    \mathbf{U}^{(k+1)} & = \argmin_{\mathbf{U}}  
+    \frac{\mu}{2} \|\mathbf{MU} - \mathbf{V}_1^{(k)} - \mathbf{D}_1^{(k)}\|_F^2  + \frac{\mu}{2} \|\mathbf{U} - \mathbf{V}_2^{(k)} - \mathbf{D}_2^{(k)}\|_F^2  + \frac{\mu}{2} \|\mathbf{U} - \mathbf{V}_3^{(k)} - \mathbf{D}_3^{(k)}\|_F^2 
+    \\
+    \mathbf{V}_1^{(k+1)} &= \argmin_{\mathbf{V}_1} \frac{1}{2} \|\mathbf{V}_1 - X \|_F^2 + \frac{\mu}{2} \|\mathbf{MU}^{(k+1)} - \mathbf{V}_1 - \mathbf{D}_1^{(k)}\|_F^2 \\
+    \mathbf{V}_2^{(k+1)} &= \argmin_{\mathbf{V}_2} \chi_{\Delta}(\mathbf{V}_2) + \frac{\mu}{2} \|\mathbf{U}^{(k+1)} - \mathbf{V}_2 - \mathbf{D}_2^{(k)}\|_F^2 \\
+    \mathbf{V}_3^{(k+1)} &= \argmin_{\mathbf{V}_3} J(\mathbf{V}_3) + \frac{\mu}{2} \|\mathbf{U}^{(k+1)} - \mathbf{V}_3 - \mathbf{D}_3^{(k)}\|_F^2 \\
+    \mathbf{D}_1^{(k+1)} &= \mathbf{D}_1^{(k)} - \mathbf{MU}^{(k+1)} + \mathbf{V}_1^{(k+1)} \\
+    \mathbf{D}_2^{(k+1)} &= \mathbf{D}_2^{(k)} - \mathbf{U}^{(k+1)} + \mathbf{V}_2^{(k+1)} \\
+    \mathbf{D}_3^{(k+1)} &= \mathbf{D}_3^{(k)} - \mathbf{U}^{(k+1)} + \mathbf{V}_3^{(k+1)}.
+  \end{aligned}
+\end{equation}
+
+The updates for $\mathbf{U}$ and $\mathbf{V}_1$ have closed form solutions due to convexity and differentiability of the Frobenius norm [REF]. Both updates can derived by taking the first partial derivatives with respect to the individual terms, setting it equal to $\mathbf{0}$, and solving accordingly. For the $\mathbf{U}$ update,
+$$
+  \begin{aligned}
+    0 &= \frac{\partial}{\partial \mathbf{U}}\left[\frac{\mu}{2} \|\mathbf{MU} - \mathbf{V}_1 - \mathbf{D}_1\|_F^2  + \frac{\mu}{2} \|\mathbf{U} - \mathbf{V}_2 - \mathbf{D}_2\|_F^2  + \frac{\mu}{2} \|\mathbf{U} - \mathbf{V}_3 - \mathbf{D}_3\|_F^2\right]
+    \\
+    0 &= \mu \left(\mathbf{M}^T(\mathbf{MU}-\mathbf{V}_1-\mathbf{D}_1) + (\mathbf{U}-\mathbf{V}_2-\mathbf{D}_2) + (\mathbf{U}-\mathbf{V}_3-\mathbf{D}_3)\right)
+    \\
+    \mathbf{M}^T\mathbf{MU} + 2\mathbf{U} &= \mathbf{M}^T(\mathbf{V}_1+\mathbf{D}_1) + (\mathbf{V}_2+\mathbf{D}_2) + (\mathbf{V}_3+\mathbf{D}_3)
+    \\
+    \mathbf{U} &= (\mathbf{M}^T \mathbf{M} + 2\mathbf{I})^{-1}(\mathbf{M}^T(\mathbf{V}_1+\mathbf{D}_1) + (\mathbf{V}_2+\mathbf{D}_2) + (\mathbf{V}_3+\mathbf{D}_3)).
+  \end{aligned}
+$$
+As $\mathbf{M}$ is known, $(\mathbf{M}^T \mathbf{M} + 2\mathbf{I})^{-1}$ can be calculated once for the entire program. For the $\mathbf{V}$ update,
+$$
+\begin{aligned}
+  0 &= \frac{\partial}{\partial \mathbf{V}_1} \left[ \frac{1}{2}\|\mathbf{V}_1-\mathbf{X}\|_F^2 + \frac{\mu}{2} \|\mathbf{MU} - \mathbf{V}_1 - \mathbf{D}_1 \|_F^2 \right]
+  \\
+  0 &= (\mathbf{V}_1 - \mathbf{X}) + \mu(\mathbf{V}_1 - (\mathbf{MU} - \mathbf{D}_1))
+  \\
+  \mathbf{V}_1 &= \frac{1}{1+\mu} \left(\mathbf{X} + (\mathbf{MU} - \mathbf{D}_1)\right).
+\end{aligned}
+% 0 &= \frac{\partial}{\partial V_1} \left[ \frac{1}{2}\|V_1-X\|_F^2 + \frac{\tau}{2} \|MU - V_1 - D_1 \|_F^2 \right] \\
+% 0 &= (V_1 - X) + \tau(V_1 - (MU - D_1)) \\
+% V_1 &= \frac{1}{1+\tau} \left(X + (MU - D_1)\right)
+% \end{aligned}
+$$
+% While the update for $\mathbf{V}_2$ does not have a closed form solution, the convexity of $\Delta$ allows for the use of an alternating projection based method for finding an approximate solution to the update. $\Delta$ itself is the intersection of two convex sets $\mathbb{R}^{n_e \times n_p}_+$ and $\{ \mathbf{A} \in \mathbb{R}^{n_e \times n_p} \mid \mathbf{1}_{n_e}^T \mathbf{A} = \mathbf{1}_{n_p}\}$. It is important to note that the update $\mathbf{V}_2$ can be rewritten as 
+
+While the update for $\mathbf{V}_2$ does not have a closed form solution, it is important to note that the update $\mathbf{V}_2$ can be equivalently rewritten as:
+$$
+\mathbf{V}_2^{(k+1)} = \argmin_{\mathbf{V}_2 \in \Delta} \frac{\mu}{2} \|\mathbf{U}^{(k+1)} - \mathbf{V}_2 - \mathbf{D}_2^{(k)}\|_F^2.
+$$
+The update, in non-formulaic terms, requires finding $\mathbf{V}_2$ that minimizes $\frac{\mu}{2} \|\mathbf{U}^{(k+1)} - \mathbf{V}_2 - \mathbf{D}_2^{(k)}\|_F^2$, then projecting the solution onto $\Delta$. 
+The non-projected minimum can be found in the same way as the updates for $\mathbf{V}$ and $\mathbf{U}$
+\begin{equation*}
+  \begin{aligned}
+    0 &= \frac{\partial}{\partial \mathbf{V}_2} \left[\frac{\mu}{2} \|\mathbf{U} - \mathbf{V}_2 - \mathbf{D}_2\|_F^2\right]
+    \\
+    0 &= \mu(\mathbf{V}_2 - (\mathbf{MU} - \mathbf{D}_2))
+    \\
+    \mathbf{V}_2 &= \mathbf{MU} - \mathbf{D}_2
+  \end{aligned}
+\end{equation*}
+The orthogonal projection of a matrix $\mathbf{X}$ onto $\Delta$ is defined as the finding the matrix $\tilde{\mathbf{X}} \in \Delta$ that minimizes the least-squares error between the two matrices. The convexity of $\Delta$ and the additional property that $\Delta$ is closed ensures that the projection is unique. Multiple numerical methods exist for computing the projection [REF]. Formally,
+\begin{equation*}
+  \text{proj}_\Delta(\mathbf{X}) = \argmin_{\tilde{\mathbf{X}} \in \Delta} \|\tilde{\mathbf{X}} - \mathbf{X}\|_F^2.
+\end{equation*}
+Thus, applying the projection, the update for $\mathbf{V}_2$ is given as
+\begin{equation*}
+  \mathbf{V}_2 = \text{proj}_\Delta(\mathbf{MU} - \mathbf{D}_2).
+\end{equation*}
+
+After deriving solutions for $\mathbf{V}_1$, $\mathbf{V}_2$, $\mathbf{U}$, the updates in \eqref{admm:ae-updates} can be written as:
+\begin{equation}
+  \label{admm:ae-updates-final-2}
+  \begin{aligned}
+    \mathbf{U}^{(k+1)} & = (\mathbf{M}^T \mathbf{M} + 2\mathbf{I})^{-1}(\mathbf{M}^T(\mathbf{V}_1^{(k)}+\mathbf{D}_1^{(k)}) + (\mathbf{V}_2^{(k)}+\mathbf{D}_2^{(k)}) + (\mathbf{V}_3^{(k)}+\mathbf{D}_3^{(k)})).
+    \\
+    \mathbf{V}_1^{(k+1)} &= \frac{1}{1+\mu} \left(\mathbf{X} + (\mathbf{MU}^{(k+1)} - \mathbf{D}_1^{(k)})\right) 
+    \\
+    \mathbf{V}_2^{(k+1)} &= \text{proj}_\Delta(\mathbf{MU}^{(k+1)} - \mathbf{D}_2^{(k)}) 
+    \\
+    \mathbf{V}_3^{(k+1)} &= \argmin_{\mathbf{V}_3} J(\mathbf{V}_3) + \frac{\mu}{2} \|\mathbf{U}^{(k+1)} - \mathbf{V}_3 - \mathbf{D}_3^{(k)}\|_F^2 
+    \\
+    \mathbf{D}_1^{(k+1)} &= \mathbf{D}_1^{(k)} - \mathbf{MU}^{(k+1)} + \mathbf{V}_1^{(k+1)} 
+    \\
+    \mathbf{D}_2^{(k+1)} &= \mathbf{D}_2^{(k)} - \mathbf{U}^{(k+1)} + \mathbf{V}_2^{(k+1)} 
+    \\
+    \mathbf{D}_3^{(k+1)} &= \mathbf{D}_3^{(k)} - \mathbf{U}^{(k+1)} + \mathbf{V}_3^{(k+1)}.
+  \end{aligned}
+\end{equation}
+
+Leaving the update for $\mathbf{V_3}$ as the only minimization problem for practicioners to derive the update for. Many variations of the abundance estimation problem exist where one or more regularization terms on $\mathbf{A}$ are added for further control over the final solution. This technique can be further extended to consider $m$ regularization terms $J_1, \dots, J_m$, in which the result is $m+2$ additional updates for the subproblems arising from splitting $\mathbf{V}$ and $m+2$ additional updates for the subproblems arising from splitting $\mathbf{D}$. The alternating direction method of multipliers technique is most useful in situations where multiple regularization terms exist in the loss function and no closed form solution exist, demonstrating it's superiority in the field of hyperspectral image analysis.
