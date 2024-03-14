@@ -1,1 +1,35 @@
-Stuff about Spectral Clustering
+Clustering aims to partition unlabelled data into a set of groupings called clusters such that a predefined similarity metric is minimized within the data points in the cluster and maximized between clusters. Traditional clustering methods such as k-means, and tree based methods suffer in situations where both spatial and spectral information must be taken into account for computing clusters and often are sensitive to initialization and outliers in data. The focus of this section is to introduce the concept of spectral clustering, which aims to partition a set of data points into cluster by storing similarity between data points in a graph structure then using spectral analysis techniques to calculate globally optimal partitions. 
+
+The particular focus will be in the context of imaging, and particularly hyperspectral imaging, the final product of a clustering algorithm should be perceptually meaningful groupings that respect both the spectral and spatial features in the image. Considering a collection of pixels $\mathbf{X} = [\; \mathbf{x}_1 \;|\; \mathbf{x}_2 \;|\; \cdots \;|\; \mathbf{x}_{n_p} \;] \in \mathbb{R}_ +^{n_b \times n_p}$ and a symmetric similarity measure $d$, the affinity matrix $\mathbf{W} \in \mathbb{R}_ +^{n_p \times n_p}$ is constructed as
+\begin{equation}
+    \label{sc:affinity-mtx}
+    \mathbf{W}_{(i,j)} = d(\mathbf{x}_i, \mathbf{x}_j).
+\end{equation}
+Typical choices for $d$ in imaging applications include calculating the euclidean norm and the cosine angle between the spectral features of $\mathbf{x}_i$ and $\mathbf{x}_j$. The euclidean distance calculates the difference in magnitude between the two pixels, leading to sensitivity under different lighting conditions. Cosine angle calculates the relative angle between the two pixel vectors, with $0$ indicating that the pixels are exactly identical or one of them is a scaled version of the other. Cosine angle is often the metric of choice due to its scale invariance property, allowing for better distinction of materials in different lighting conditions.
+\begin{equation}
+    \label{sc:affinity-measures}
+    \begin{aligned}
+        d_{L_2}(\mathbf{x}_i, \mathbf{x}_j) &= \| \mathbf{x}_i -\mathbf{x}_j \|_2
+        \\
+        d_{\theta}(\mathbf{x}_i, \mathbf{x}_j) &= \arccos\left(\frac{\mathbf{x}_i\mathbf{x}_j^T }{\|\mathbf{x}_i\|_2\|\mathbf{x}_j\|_2}\right)
+    \end{aligned}
+\end{equation}
+As $d_{L_2} \in [0,\infty)$ and $d_\theta \in [0, \pi]$, the affinity matrix $\mathbf{W}$ can alternatively be constructed using the heat kernel matrix with $0 < \sigma < 1$, this pushes similar pixels to have $\mathbf{W}(i,j) = 0$ and similar pixels to have $\mathbf{W}(i,j) = 1$. 
+\begin{equation}
+    \label{sc:affinity-type-2}
+    \mathbf{W}_{(i,j)} = \exp\left(-\frac{d(\mathbf{x}_i,\mathbf{x}_j)^2}{\sigma^2}\right).
+\end{equation}
+
+A graph $G = (V,E)$ is a set of vertices $V$ and edges $E$ that connect them. Considering the set of pixels $\{\mathbf{x}_1, \mathbf{x}_2 , \cdots , \mathbf{x}_{n_p} \}$ as the set of vertices and $d(\mathbf{x}_i, \mathbf{x}_j)$ as the edges between them, $\mathbf{W}$ is the matrix representation of a graph $G_\mathbf{W}$. Spectral Analysis itself is the study of $\mathbf{W}$ using linear algebra techniques to determine insights on the structure of $G_\mathbf{W}$ using the eigenvalues and eigenvectors of $\mathbf{W}$. A fundamental matrix in spectral analysis is the graph Laplacian matrix $\mathbf{L}$. $\mathbf{L}$ is calculated as the difference between the diagonal matrix $\mathbf{D}$, calculated as
+\begin{equation}
+    \label{sc:d-mtx}
+    \mathbf{D}_{(i,j)} = \begin{cases}
+        \sum _{j}\mathbf{W}_{(i,j)} &\quad \text{if } i = j,\\
+        0 & \quad \text{if } i \neq j
+    \end{cases}
+\end{equation}
+and $\mathbf{W}$. Formally,
+\begin{equation}
+    \label{sc:laplacian-mtx}
+    \mathbf{L} = \mathbf{D} - \mathbf{W}
+\end{equation}
