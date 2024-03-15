@@ -20,7 +20,7 @@ As $d_{L_2} \in [0,\infty)$ and $d_\theta \in [0, \pi]$, the affinity matrix $\m
     \mathbf{W}_{(i,j)} = \exp\left(-\frac{d(\mathbf{x}_i,\mathbf{x}_j)^2}{\sigma^2}\right).
 \end{equation}
 
-A graph $G = (V,E)$ is a set of vertices $V$ and edges $E$ that connect them. Considering the set of pixels $\{\mathbf{x}_1, \mathbf{x}_2 , \cdots , \mathbf{x}_{n_p} \}$ as the set of vertices and $d(\mathbf{x}_i, \mathbf{x}_j)$ as the edges between them, $\mathbf{W}$ is the matrix representation of a graph $G_\mathbf{W}$. Spectral Analysis itself is the study of $\mathbf{W}$ using linear algebra techniques to determine insights on the structure of $G_\mathbf{W}$ using the eigenvalues and eigenvectors of $\mathbf{W}$. A fundamental matrix in spectral analysis is the graph Laplacian matrix $\mathbf{L}$. $\mathbf{L}$ is calculated as the difference between the diagonal matrix $\mathbf{D}$, calculated as
+A graph $G = (V,E)$ is a set of vertices $V$ and edges $E$ that connect them. Considering the set of pixels $\{\mathbf{x}_1, \mathbf{x}_2 , \cdots , \mathbf{x}_{n_p} \}$ as the set of vertices and $d(\mathbf{x}_i, \mathbf{x}_j)$ as the edges between them, $\mathbf{W}$ is the matrix representation of a graph $G_W$. Spectral Analysis is then the study of $\mathbf{W}$ using linear algebra techniques to determine insights on the structure of $G_W$ using the eigenvalues and eigenvectors of $\mathbf{W}$. A fundamental matrix in spectral analysis is the graph Laplacian matrix $\mathbf{L}$, calculated as the difference between the diagonal matrix $\mathbf{D}$ where
 \begin{equation}
     \label{sc:d-mtx}
     \mathbf{D}_{(i,j)} = \begin{cases}

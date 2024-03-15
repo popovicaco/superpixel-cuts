@@ -9,7 +9,7 @@ The task is referred to as abundance estimation and continues to be an active ar
 
 The least-squares reconstruction error can alternatively be written as the squared Frobenius norm, denoted as $\|\cdot\|_F^2$, of the difference between  $\tilde{\mathbf{X}}$ and $\mathbf{X}$. This choice of $\mathcal{L}$ is the straightforward approach as $\mathcal{L}$ is both convex and differentiable, with the additional properties that $\mathcal{L}(\tilde{\mathbf{X}},\mathbf{X}) = \mathcal{L}(\mathbf{X},\tilde{\mathbf{X}})$ and $ \mathcal{L}(\mathbf{X},\tilde{\mathbf{X}}) = \mathcal{L}(\mathbf{X}^T,\tilde{\mathbf{X}^T})$ [REF].
 
-To incorporate the ANC-ASC constraint into the overall formulation of $\mathcal{L}$, the set $\Delta$ from Section \ref{LMM} proves useful. It is important to note that $\Delta$ is a convex set, meaning that for matrices $A, B \in \Delta$, for all $0 \leq \alpha \leq 1$, the matrix $C = \alpha A + (1- \alpha)B$ is also an element of $\Delta$. The inclusion of the constraints on $\mathbf{A}$ is facilitated using the piecewise function $\chi_S$ where
+To incorporate the ANC-ASC constraint into the overall formulation of $\mathcal{L}$, the set $\Delta$ from Section \ref{LMM} proves useful. It is important to note that $\Delta$ is a convex set, meaning that for matrices $A, B \in \Delta$, for all $0 \leq \alpha \leq 1$, the matrix $C = \alpha A + (1- \alpha)B$ is also an element of $\Delta$. The inclusion of the constraints on $\mathbf{A}$ is facilitated using the piecewise function $\chi_S$ defined as follows
 
 \begin{equation}
     \label{ae:indfunc}

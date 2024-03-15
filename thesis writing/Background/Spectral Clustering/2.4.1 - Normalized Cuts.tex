@@ -1,0 +1,15 @@
+A graph $G = (V,E)$ with affinity matrix $\mathbf{W}$ can be partitioned into two subgraphs $G_A = (V_A, E_A)$ and $G_B = (V_B, E_B)$ such that $V_A \cup V_B = V$ and $V_A \cap V_B = \emptyset$ by removing the edges between the vertices in $G_A$ and $G_B$. The dissimilarity between these two graphs can be calculated as the sum of the edges cut to form the partitions
+\begin{equation}
+    \label{sc:cut}
+    \cut(G_A,G_B) = \sum_{i \in V_A,\;j \in V_B}{\mathbf{W}_{(i,j)}}
+\end{equation}
+The optimal bipartitioning of $G_W$ is given as the graphs $G_A$ and $G_B$ that minimize \eqref{sc:cut}. However, in the case of image segmentation, this criteria will heavily prioritize partitioning single pixels from the image. Instead, the normalized cuts criteria [REF] is proposed, focusing on balancing the ratio between the edges cut and the sum of the internal edge nodes within $G_A$ and $G_B$ defined as 
+\begin{equation}
+    \label{sc:ncut-criteria}
+    \ncut(G_A, G_B) = \frac{\cut(G_A, G_B)}{\assoc(G_A, G)} + \frac{\cut(G_A, G_B)}{\assoc(G_B, G)}
+\end{equation}
+where 
+\begin{equation}
+    \label{sc:assoc}
+    \assoc(G_A, G) = \sum_{i \in V_A,\;j \in V}{\mathbf{W}_{(i,j)}}
+\end{equation}
