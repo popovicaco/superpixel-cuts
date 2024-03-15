@@ -64,6 +64,8 @@
 \section{Introduction}
 
 \subsection{Motivations}
+\subsection{Applications to Biomedical Imaging}
+\subsection{Hyperspectral Data}
 
 \clearpage
 % #############################################
@@ -75,32 +77,35 @@
 % #############################################
 \section{Background} \label{Background}
 \subsection{Hyperspectral Imaging: Basics} \label{Basics}
-\input{Background/Hyperspectral Imaging/2.1 - Basics}
+\input{Background/Hyperspectral Imaging/Basics/Basics.tex}
 \subsubsection{The Hyperspectral Cube} \label{Cube}
-\input{Background/Hyperspectral Imaging/2.1.1 - Hyperspectral Cube.tex}
+\input{Background/Hyperspectral Imaging/Basics/Hyperspectral Cube.tex}
 
 \clearpage
 \subsection{Superpixel Generation} \label{Superpixel}
-\input{Background/Superpixel Generation/2.2 - Superpixel Generation.tex}
+\input{Background/Superpixel Generation/Superpixel Generation.tex}
 \subsubsection{Simple Linear Iterative Clustering} \label{SLIC}
-\input{Background/Superpixel Generation/2.2.1 - Simple Linear Iterative Clustering.tex}
+\input{Background/Superpixel Generation/Simple Linear Iterative Clustering.tex}
 
 \clearpage
 \subsection{Hyperspectral Unmixing} \label{Unmixing Intro}
-\input{Background/Hyperspectral Unmixing/2.3 - Unmixing and AE.tex}
+\input{Background/Hyperspectral Unmixing/Unmixing and AE.tex}
 \subsubsection{Linear Mixing Model}\label{LMM}
-\input{Background/Hyperspectral Unmixing/2.3.1 - Linear Mixing Model.tex}
+\input{Background/Hyperspectral Unmixing/Linear Mixing Model.tex}
 \subsubsection{Abundance Estimation}\label{AE}
-\input{Background/Hyperspectral Unmixing/2.3.2 - Abundance Estimation.tex}
-\subsubsection{Alternating Direction Method of Multipliers}\label{ADMM Intro}
-\input{Background/Hyperspectral Unmixing/2.3.3 - ADMM.tex}
-\subsubsection{Abundance Estimation using ADMM}\label{Block ADMM}
-\input{Background/Hyperspectral Unmixing/2.3.4 - ADMM Unmixing.tex}
+\input{Background/Hyperspectral Unmixing/Abundance Estimation.tex}
+
+\clearpage
+\subsection{Alternating Direction Method of Multipliers}\label{ADMM Intro}
+\input{Background/ADMM/ADMM.tex}
+% \subsubsection{Abundance Estimation using ADMM}\label{Block ADMM}
+%  \input{Background/Hyperspectral Unmixing/2.3.4 - ADMM Unmixing.tex}
+
 \clearpage
 \subsection{Spectral Clustering} \label{Spectral Clustering}
-\input{Background/Spectral Clustering/2.4 - Spectral Clustering.tex}
+\input{Background/Spectral Clustering/Spectral Clustering.tex}
 \subsubsection{Normalized Cuts} \label{Normalized Cuts}
-\input{Background/Spectral Clustering/2.4.1 - Normalized Cuts.tex}
+\input{Background/Spectral Clustering/Normalized Cuts.tex}
 
 \clearpage
 % #############################################
@@ -113,17 +118,29 @@
 \section{Adaptive Superpixel Cuts} \label{Algorithm Intro}
 
 \subsection{Dataset Preprocessing} \label{Algorithm Preprocessing}
+\input{Adaptive Superpixel Cuts/Preprocessing/Dataset Preprocessing.tex}
 \subsubsection{Singular Value Decomposition} \label{SVD}
+\input{Adaptive Superpixel Cuts/Preprocessing/SVD.tex}
 \subsubsection{Layer Normalization} \label{Normalization}
+\input{Adaptive Superpixel Cuts/Preprocessing/Normalization.tex}
 
 \clearpage
 \subsection{Algorithm Overview} \label{Algorithm Overview}
+\input{Adaptive Superpixel Cuts/Algorithm/Algorithm Proposal.tex}
 \subsubsection{Superpixel Generation} \label{Algorithm Superpixels}
+\input{Adaptive Superpixel Cuts/Algorithm/Superpixel Generation.tex}
 \subsubsection{Construction of the Affinity Matrix $\mathbf{W}$}\label{Algorithm Laplacian}
+\input{Adaptive Superpixel Cuts/Algorithm/Affinity Matrix Construction.tex}
 \subsubsection{Normalized Cuts Algorithm}\label{Algorithm Ncuts}
+\input{Adaptive Superpixel Cuts/Algorithm/Normalized Cuts Algorithm.tex}
 \subsubsection{Graph Regularized Fully Constrained Unmixing}\label{Algorithm Unmixing}
+\input{Adaptive Superpixel Cuts/Algorithm/Graph Unmixing.tex}
 \subsubsection{Feature Vector Creation}\label{Algorithm FV}
+\input{Adaptive Superpixel Cuts/Algorithm/Feature Vector Creation.tex}
+\subsubsection{Compilation}\label{Compilation}
+\input{Adaptive Superpixel Cuts/Algorithm/Overall View.tex}
 \subsubsection{Parameter Selection}\label{Parameters}
+
 
 \clearpage
 % #############################################
@@ -141,11 +158,13 @@
 \subsection{Geospatial Testing Datasets}
 \subsubsection{Samson Datasets}
 \subsubsection{Salinas Datasets}
+\subsubsection{Biomedical Autofluorescence Dataset}
 
 \clearpage
 \subsection{Algorithm Evaluation}
 \subsubsection{Qualitative Evaluation on Samson}
 \subsubsection{Quantitative Evaluation on Salinas}
+\subsubsection{Qualitative Evaluation on Biomedical Autofluorescence Data}
 
 \clearpage
 \subsection{Algorithm Comparison}
@@ -158,10 +177,6 @@
 % 
 % 
 % #############################################
-\section{Applications in Biomedical Imaging}
-
-\subsection{Dr Yucel Motivations}
-\subsection{Results on Biomedical Hyperspectral Images}
 
 \clearpage
 % #############################################
