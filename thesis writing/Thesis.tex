@@ -115,19 +115,31 @@
 \section{Adaptive Superpixel Cuts} \label{Algorithm Intro}
 \input{Adaptive Superpixel Cuts/Intro.tex}
 
-
+\clearpage
 % \subsection{Proposed Algorithm} \label{Algorithm Overview}
+\subsection{Dataset Preprocessing} \label{Algorithm Preprocessing}
+\input{Adaptive Superpixel Cuts/Preprocessing.tex}
+\subsubsection{Singular Value Decomposition} \label{SVD}
+\input{Adaptive Superpixel Cuts/SVD.tex}
+\subsubsection{Layer Normalization} \label{Normalization}
+\input{Adaptive Superpixel Cuts/Normalization.tex}
+
+
+\clearpage
 % \input{Adaptive Superpixel Cuts/Algorithm Proposal.tex}
 \subsection{Hyperspectral Superpixel Generation} \label{Algorithm Superpixels}
-\input{Adaptive Superpixel Cuts/Algorithm/Superpixel Generation.tex}
+\input{Adaptive Superpixel Cuts/Superpixel Generation.tex}
+
+
+\clearpage
 \subsection{Spatial Spectral Clustering}\label{Algorithm Laplacian}
-\input{Adaptive Superpixel Cuts/Algorithm/Affinity Matrix Construction.tex}
+\input{Adaptive Superpixel Cuts/Affinity Matrix Construction.tex}
 \subsection{Graph Regularized Abundance Estimation}\label{Algorithm Unmixing}
 % \input{Adaptive Superpixel Cuts/Algorithm/Graph Unmixing.tex}
 \subsection{Feature Vector Creation}\label{Algorithm FV}
-\input{Adaptive Superpixel Cuts/Algorithm/Feature Vector Creation.tex}
+\input{Adaptive Superpixel Cuts/Feature Vector Creation.tex}
 \subsection{Compilation}\label{Compilation}
-\input{Adaptive Superpixel Cuts/Algorithm/Overall View.tex}
+\input{Adaptive Superpixel Cuts/Overall View.tex}
 \subsection{Parameter Selection}\label{Parameters}
 
 
@@ -141,12 +153,6 @@
 % #############################################
 \section{Experimental Results}
 
-\subsection{Dataset Preprocessing} \label{Algorithm Preprocessing}
-\input{Experimental Results/Preprocessing/Dataset Preprocessing.tex}
-\subsubsection{Singular Value Decomposition} \label{SVD}
-\input{Experimental Results/Preprocessing/SVD.tex}
-\subsubsection{Layer Normalization} \label{Normalization}
-\input{Experimental Results/Preprocessing/Normalization.tex}
 
 \subsection{Implementation Details}
 
