@@ -1,5 +1,7 @@
-Hyperspectral images often have bands with significantly higher intensity values compared to others. It is important to consider the full range of wavelengths rather than allow the overprioritization of higher intensity wavelengths, especially in situations where direct scale comparison is made between pixels. By normalizing each spectral band to a similar scale, all spectral bands contribute more equally to the segmentation process. This ensures that results capture the underlying spectral information more effectively. A common approach to normalization in hyperspectral images is band normalization, where intesity values are independently scaled to $[0,1]$ for each spectral band:
+Hyperspectral images often have bands with significantly higher intensity values compared to others. It is important to consider the full range of wavelengths rather than allow the overprioritization of higher intensity wavelengths, especially in situations where direct scale comparison is made between pixels. By normalizing each spectral band to a similar scale, all spectral bands contribute more equally to the segmentation process. This ensures that results capture the underlying spectral information more effectively. 
+
+A common approach to normalization in hyperspectral images is band normalization, where intesity values for the hyperspectral image at spectral band $k$, denoted $\mathbf{X}_{(\cdot, \cdot, k)}$ are independently scaled to $[0,1]$ according to the minimum and maximum values at that band. Formally,
 \begin{equation}
     \label{alg:normalization}
-    \tilde{\mathbf{X}}_{(\cdot, \cdot, k)} =  \frac{\mathbf{X}_{(\cdot, \cdot, k)} - \min\mathbf{X}_{(\cdot, \cdot, k)}}{\max\mathbf{X}_{(\cdot, \cdot, k)} - \min\mathbf{X}_{(\cdot, \cdot, k)}}
+    \hat{\mathbf{X}}_{(\cdot, \cdot, k)} =  \frac{\mathbf{X}_{(\cdot, \cdot, k)} - \min\mathbf{X}_{(\cdot, \cdot, k)}}{\max\mathbf{X}_{(\cdot, \cdot, k)} - \min\mathbf{X}_{(\cdot, \cdot, k)}}.
 \end{equation}

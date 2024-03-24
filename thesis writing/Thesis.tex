@@ -2,7 +2,7 @@
 \usepackage{graphicx} % Required for inserting images
 \usepackage{amsmath}
 \usepackage{amssymb}
-\usepackage[margin=1in]{geometry}
+\usepackage[margin=0.75in]{geometry}
 \usepackage{algorithm2e}
 \usepackage{fancyhdr}
 \usepackage{caption}
@@ -82,11 +82,13 @@
 \subsection{The Hyperspectral Cube} \label{Cube}
 \input{Background/Hyperspectral Imaging/Basics/Hyperspectral Cube.tex}
 
+\clearpage
 \subsection{Superpixel Generation} \label{Superpixel}
 \input{Background/Superpixel Generation/Superpixel Generation.tex}
 \subsubsection{Simple Linear Iterative Clustering} \label{SLIC}
 \input{Background/Superpixel Generation/Simple Linear Iterative Clustering.tex}
 
+\clearpage
 \subsection{Hyperspectral Unmixing} \label{Unmixing Intro}
 \input{Background/Hyperspectral Unmixing/Unmixing and AE.tex}
 \subsubsection{Linear Mixing Model}\label{LMM}
@@ -94,11 +96,13 @@
 \subsubsection{Abundance Estimation}\label{AE}
 \input{Background/Hyperspectral Unmixing/Abundance Estimation.tex}
 
+\clearpage
 \subsection{Alternating Direction Method of Multipliers}\label{ADMM Intro}
 \input{Background/ADMM/ADMM.tex}
 % \subsubsection{Abundance Estimation using ADMM}\label{Block ADMM}
 %  \input{Background/Hyperspectral Unmixing/2.3.4 - ADMM Unmixing.tex}
 
+\clearpage
 \subsection{Spectral Clustering} \label{Spectral Clustering}
 \input{Background/Spectral Clustering/Spectral Clustering.tex}
 \subsubsection{Normalized Cuts} \label{Normalized Cuts}
@@ -124,16 +128,16 @@
 \subsubsection{Layer Normalization} \label{Normalization}
 \input{Adaptive Superpixel Cuts/Normalization.tex}
 
-
 \clearpage
 % \input{Adaptive Superpixel Cuts/Algorithm Proposal.tex}
 \subsection{Hyperspectral Superpixel Generation} \label{Algorithm Superpixels}
 \input{Adaptive Superpixel Cuts/Superpixel Generation.tex}
 
-
 \clearpage
 \subsection{Spatial Spectral Clustering}\label{Algorithm Laplacian}
-\input{Adaptive Superpixel Cuts/Affinity Matrix Construction.tex}
+\input{Adaptive Superpixel Cuts/Normalized Cuts Algorithm.tex}
+
+\clearpage
 \subsection{Graph Regularized Abundance Estimation}\label{Algorithm Unmixing}
 % \input{Adaptive Superpixel Cuts/Algorithm/Graph Unmixing.tex}
 \subsection{Feature Vector Creation}\label{Algorithm FV}
