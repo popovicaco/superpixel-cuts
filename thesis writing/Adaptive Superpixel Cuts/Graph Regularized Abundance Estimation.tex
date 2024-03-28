@@ -1,0 +1,12 @@
+In Section \ref{AE}, the abundance estimation problem for a collection of pixels $\mathbf{X}$ given the endmember spectra matrix $\mathbf{M}$ was known was stated as follows:
+
+\begin{equation*}
+    A = \argmin_{A \in \mathbb{R}^{n_e \times n_p}} \frac{1}{2}\|\mathbf{MA} - \mathbf{X}\|_F^2 + \chi_\Delta(\mathbf{A}) + J(\mathbf{A}).
+\end{equation*}
+
+The goal of this section is to apply a similar framework to the collection of superpixels $\mathbf{C}$ and determine estimates on the fractional abundances given an endmember spectra matrix $\mathbf{M}$ from the output of the clustering in Section \ref{Algorithm NCuts}. The abundance estimation problem in terms of superpixels can now be restated as
+\begin{equation*}
+    A = \argmin_{A \in \mathbb{R}^{n_e \times n_p}} \frac{1}{2}\|\mathbf{MA} - \mathbf{C}\|_F^2 + \chi_\Delta(\mathbf{A}) + J(\mathbf{A}).
+\end{equation*}
+
+In previous sections, a regularization term $J$ was introduced to provide further control on the final values of $\mathbf{A}$. In imaging applications, a common assumption is that abundance values should not vary greatly for pixels next to eachother. In a similar fashion, abundance values should not vary greatly for superpixels spatially close to eachother. To accomodate this assumption, distance regularization
