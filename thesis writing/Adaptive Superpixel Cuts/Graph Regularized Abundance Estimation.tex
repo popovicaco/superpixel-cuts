@@ -3,7 +3,7 @@ In Section \ref{AE}, the abundance estimation problem for a collection of pixels
     \mathbf{A} = \argmin_{\mathbf{A} \in \mathbb{R}^{n_e \times n_p}} \frac{1}{2}\|\mathbf{MA} - \mathbf{X}\|_F^2 + \chi_\Delta(\mathbf{A}) + J(\mathbf{A}).
 \end{equation*}
 
-The goal of this section is to apply a similar framework to the collection of superpixels $\mathbf{C}$ and determine estimates on the fractional abundances given an endmember spectra matrix $\mathbf{M}$ from the output of the clustering in Section \ref{Algorithm NCuts}. The abundance estimation problem in terms of superpixels can now be restated as
+The goal of this section is to apply a similar framework to the collection of superpixels $\mathbf{C}$ and determine estimates on the fractional abundances given an cluster spectra matrix $\mathbf{M}$ from the output of the clustering in Section \ref{Algorithm NCuts}. The abundance estimation problem in terms of superpixels can now be restated as
 \begin{equation*}
     \mathbf{A} = \argmin_{\mathbf{A} \in \mathbb{R}^{n_e \times n_p}} \frac{1}{2}\|\mathbf{MA} - \mathbf{C}\|_F^2 + \chi_\Delta(\mathbf{A}) + J(\mathbf{A}).
 \end{equation*}
@@ -181,7 +181,7 @@ The updates for $\mathbf{U}$ and $\mathbf{V}_1$ have closed form solutions due t
     \mathbf{U} &= (\mathbf{M}^T \mathbf{M} + 2\mathbf{I})^{-1}(\mathbf{M}^T(\mathbf{V}_1+\mathbf{D}_1) + (\mathbf{V}_2+\mathbf{D}_2) + (\mathbf{V}_3+\mathbf{D}_3)).
   \end{aligned}
 \end{equation*}
-As $\mathbf{M}$ is known, $(\mathbf{M}^T \mathbf{M} + 2\mathbf{I})^{-1}$ can be calculated and cached once for the entire runtime. For the $\mathbf{V}_1$ update,
+As $\mathbf{M}$ is known and unchanged, $(\mathbf{M}^T \mathbf{M} + 2\mathbf{I})^{-1}$ can be calculated and cached once for the entire runtime. For the $\mathbf{V}_1$ update,
 $$
 \begin{aligned}
    \mathbf{0} &= \frac{\partial}{\partial \mathbf{V}_1} \left[ \frac{1}{2}\|\mathbf{V}_1-\mathbf{C}\|_F^2 + \frac{\mu}{2} \|\mathbf{MU} - \mathbf{V}_1 - \mathbf{D}_1 \|_F^2 \right]
@@ -204,16 +204,93 @@ The non-projected minimum can be found in the same way as the updates for $\math
     \\
     \mathbf{0} &= \mu(\mathbf{V}_2 - (\mathbf{MU} - \mathbf{D}_2))
     \\
-    \mathbf{V}_2 &= \mathbf{MU} - \mathbf{D}_2
+    \mathbf{V}_2 &= \mathbf{MU} - \mathbf{D}_2.
   \end{aligned}
 \end{equation*}
-The orthogonal projection of a matrix $\mathbf{X}$ onto $\Delta$ is defined as the finding the matrix $\tilde{\mathbf{X}} \in \Delta$ that minimizes the least-squares error between the two matrices. The convexity of $\Delta$ and the additional property that $\Delta$ is closed ensures that the projection is unique. Multiple numerical methods exist for computing the projection [REF]. Formally,
+The orthogonal projection of a matrix $\mathbf{C}$ onto the convex and closed set $\Delta$ is defined as the finding the matrix $\tilde{\mathbf{C}} \in \Delta$ that minimizes the least-squares error between the two matrices. Multiple numerical methods exist for computing the projection [REF]. Formally,
 \begin{equation*}
-  \text{proj}_\Delta(\mathbf{X}) = \argmin_{\tilde{\mathbf{X}} \in \Delta} \|\tilde{\mathbf{X}} - \mathbf{X}\|_F^2.
+  \text{proj}_\Delta(\mathbf{C}) = \argmin_{\tilde{\mathbf{C}} \in \Delta} \|\tilde{\mathbf{C}} - \mathbf{C}\|_F^2.
 \end{equation*}
 Thus, applying the projection, the update for $\mathbf{V}_2$ is given as
 \begin{equation*}
   \mathbf{V}_2 = \text{proj}_\Delta(\mathbf{MU} - \mathbf{D}_2).
 \end{equation*}
 
-The approach for deriving update for $\mathbf{V}_3$ follows the same as $\mathbf{U}$ and $\mathbf{V}_1$ due to the convexity and differentiability of the regularization term $\text{tr}(\mathbf{V}_3\mathbf{L}\mathbf{V}_3^T)$ 
+The approach for deriving update for $\mathbf{V}_3$ follows the same as $\mathbf{U}$ and $\mathbf{V}_1$ due to the convexity and differentiability of the regularization term $\text{tr}(\mathbf{V}_3\mathbf{L}\mathbf{V}_3^T)$. 
+\begin{equation*}
+  \begin{aligned}
+    \mathbf{0} &= \frac{\partial}{\partial \mathbf{V}_3}\left[ \frac{\beta}{2} \text{tr}(\mathbf{V}_3\mathbf{L}\mathbf{V}_3^T) + \frac{\mu}{2} \|\mathbf{U} - \mathbf{V}_3 - \mathbf{D}_3\|_F^2  \right]
+    \\
+    \mathbf{0} &= \frac{\beta}{2} (\mathbf{V}_3\mathbf{L}^T + \mathbf{V}_3 \mathbf{L}) + \mu (\mathbf{V}_3 - (\mathbf{U} - \mathbf{D}_3))
+    \\
+    \mathbf{0} &= \beta \mathbf{V}_3 \mathbf{L} + \mu \mathbf{V}_3 - \mu (\mathbf{U} - \mathbf{D}_3)
+    \\
+    \mathbf{V}_3 \left(\mathbf{L} + \frac{\mu}{\beta} \mathbf{I}\right) &= \frac{\mu}{\beta}(\mathbf{U} - \mathbf{D}_3)
+    \\
+    \mathbf{V}_3 &= \frac{\mu}{\beta}(\mathbf{U} - \mathbf{D}_3) \left(\mathbf{L} + \frac{\mu}{\beta} \mathbf{I}\right)^{-1}.
+  \end{aligned}
+\end{equation*}
+%Horn, Roger A.; Johnson, Charles R. (1985). Matrix Analysis. Cambridge University Press. ISBN 978-0-521-38632-6.
+As $\mathbf{L}$ is a real valued, symettric matrix, it can be eigendecomposed into the product $\mathbf{L} = \mathbf{S \Sigma S}^T$, where $\mathbf{S}$ is a matrix whose columns are the eigenvectors of $\mathbf{L}$, and $\mathbf{\Sigma}$ is a matrix whose diagonal elements are the eigenvalues of $\mathbf{L}$. Additionally, $\mathbf{S}$ is an orthogonal matrix, as such, $\mathbf{S}^T = \mathbf{S}^{-1}$ and $\mathbf{SS}^T = \mathbf{I}$. [REF] One important note to be made about the update step is that computing the inverse of the term $(\mathbf{L} + \mu / \beta \mathbf{I})$ is slower than computing the eigendecomposition $\mathbf{L}$ due to the naturally sparse definition of $\mathbf{L}$ and it's underlying distance matrix $\mathbf{W}_{\kappa}$. Using that information, a more efficent update can be performed by calculating the eigendecomposition $\mathbf{L} = \mathbf{S \Sigma S}^T$ and simplifying the update for $\mathbf{V}_3$ as follows:
+\begin{equation*}
+  \begin{aligned}
+    \mathbf{V}_3 &= \frac{\mu}{\beta}(\mathbf{U} - \mathbf{D}_3) \left(\mathbf{L} + \frac{\mu}{\beta} \mathbf{I}\right)^{-1}
+    \\
+    \mathbf{V}_3 &= \frac{\mu}{\beta}(\mathbf{U} - \mathbf{D}_3) \left(\mathbf{S \Sigma S}^T + \frac{\mu}{\beta} \mathbf{SS}^T\right)^{-1}
+    \\ 
+    \mathbf{V}_3 &= \frac{\mu}{\beta}(\mathbf{U} - \mathbf{D}_3) 
+    \left(\mathbf{S}\left(\mathbf{\Sigma} + \frac{\mu}{\beta} \mathbf{I}\right)  \mathbf{S}^T\right)^{-1}
+    \\
+    \mathbf{V}_3 &= \frac{\mu}{\beta}(\mathbf{U} - \mathbf{D}_3) \mathbf{S} \left(\mathbf{\Sigma} + \frac{\mu}{\beta} \mathbf{I}\right)^{-1} \mathbf{S}^T.
+  \end{aligned}
+\end{equation*}
+The values along the diagonal in $\mathbf{\Sigma}$ are all nonnegative due to $\mathbf{L}$ having nonnegative eigenvalues [REF]. As such, the matrix $(\mathbf{\Sigma} + \mu / \beta \mathbf{I})$ is a diagonal matrix with the it's elements being all strictly positive. The inverse of $\left(\mathbf{\Sigma} + \mu / \beta \mathbf{I}\right)$ can be directly calculated as by taking the reciprocal of it's diagonal elements. As $\mathbf{L}$ is known at the onset of the algorithm and the parameters $\mu$ and $\beta$ do not change between iterations, $\mathbf{S} (\mathbf{\Sigma} + \mu / \beta \mathbf{I})^{-1} \mathbf{S}^T$ can be cached and reused across iterations.
+
+The derived updates in \eqref{admm:ae-updates-final}, for parameters $\mu > 0$ and $\beta > 0$ are subsequently given as:
+\begin{subequations}
+  \begin{align}
+    \mathbf{U}^{(k+1)} & = (\mathbf{M}^T \mathbf{M} + 2\mathbf{I})^{-1}\left(\mathbf{M}^T\left(\mathbf{V}_1^{(k)}+\mathbf{D}_1^{(k)}\right) + \left(\mathbf{V}_2^{(k)}+\mathbf{D}_2^{(k)}\right) + \left(\mathbf{V}_3^{(k)}+\mathbf{D}_3^{(k)}\right)\right) \label{unmixing:u} 
+    \\
+    \mathbf{V}_1^{(k+1)} &= \frac{1}{1+\mu} \left(\mathbf{C} + \left(\mathbf{MU}^{(k+1)} - \mathbf{D}_1^{(k)}\right)\right) \label{unmixing:v1} 
+    \\
+    \mathbf{V}_2^{(k+1)} &= \text{proj}_\Delta\left(\mathbf{MU}^{(k+1)} - \mathbf{D}_2^{(k)}\right) \label{unmixing:v2} 
+    \\
+    \mathbf{V}_3^{(k+1)} &= \frac{\mu}{\beta}\left(\mathbf{U}^{(k+1)} - \mathbf{D}_3^{(k)}\right) \mathbf{S} \left(\mathbf{\Sigma} + \frac{\mu}{\beta} \mathbf{I}\right)^{-1} \mathbf{S}^T \label{unmixing:v3} 
+    \\
+    \mathbf{D}_1^{(k+1)} &= \mathbf{D}_1^{(k)} - \mathbf{MU}^{(k+1)} + \mathbf{V}_1^{(k+1)} \label{unmixing:d1}  \\
+    \mathbf{D}_2^{(k+1)} &= \mathbf{D}_2^{(k)} - \mathbf{U}^{(k+1)} + \mathbf{V}_2^{(k+1)} \label{unmixing:d2}  \\
+    \mathbf{D}_3^{(k+1)} &= \mathbf{D}_3^{(k)} - \mathbf{U}^{(k+1)} + \mathbf{V}_3^{(k+1)}. \label{unmixing:d3} 
+  \end{align}
+\end{subequations}
+The algorithm is set to terminate when $ \|\mathbf{U}^{(k+1)} - \mathbf{U}^{(k)}\|_F/\|\mathbf{U}^{(k)}\|_F $ falls below a set tolerance $\epsilon$ or the algorithm reaches a maximum iterative index of $k_{\text{max}}$. After such point, $\mathbf{U}^{(k+1)}$ is given as the final result, representing the approximate solution of $\mathbf{A}$ to the minimization problem described in \eqref{unmixing:graph-reg-ae}. In it's entirety, the abundance estimation algorithm can be described with the following algorithm outline.
+
+\begin{algorithm}[H]
+  \caption{Graph Regularized Abundance Estimation}
+  \textbf{Input}: \\
+  \quad  $\mathbf{C}$, $\mathbf{M}$, $\mathbf{W}_{\kappa}$, $\beta > 0$, $\mu > 0$, $k_{\text{max}} > 0$, $\epsilon > 0$.
+  \\
+  \textbf{Initialize:} 
+  \\
+  \quad Precompute and cache $\mathbf{S} (\mathbf{\Sigma} + \mu / \beta \mathbf{I})^{-1} \mathbf{S}^T$ and $(\mathbf{M}^T \mathbf{M} + 2\mathbf{I})^{-1}$\\
+  \quad $\mathbf{U}^{(0)}  \in \Delta$ \\
+  \quad $\mathbf{V}_1^{(0)} = \mathbf{MU}^{(0)}$ \\
+  \quad $\mathbf{V}_2^{(0)} = \mathbf{U}^{(0)}$ \\
+  \quad $\mathbf{V}_3^{(0)} = \mathbf{U}^{(0)}$ \\
+  \quad $\mathbf{D}_1^{(0)} = \mathbf{0}$ \\
+  \quad $\mathbf{D}_2^{(0)} = \mathbf{0}$ \\
+  \quad $\mathbf{D}_3^{(0)} = \mathbf{0}$
+  \\
+  \textbf{For} $k = 0$ \text{to} $k_{\text{max}}$:\\
+  \quad Update $\mathbf{U}^{(k+1)}$ according to \eqref{unmixing:u} \\
+  \quad Update $\mathbf{V}_1^{(k+1)}$ according to \eqref{unmixing:v1} \\
+  \quad Update $\mathbf{V}_2^{(k+1)}$ according to \eqref{unmixing:v2} \\
+  \quad Update $\mathbf{V}_3^{(k+1)}$ according to \eqref{unmixing:v3} \\
+  \quad Update $\mathbf{D}_1^{(k+1)}$ according to \eqref{unmixing:d1} \\
+  \quad Update $\mathbf{D}_2^{(k+1)}$ according to \eqref{unmixing:d2} \\
+  \quad Update $\mathbf{D}_3^{(k+1)}$ according to \eqref{unmixing:d3} \\
+  \quad \textbf{Break if } $ \|\mathbf{U}^{(k+1)} - \mathbf{U}^{(k)}\|_F/\|\mathbf{U}^{(k)}\|_F < \epsilon$ \\
+  \textbf{Output}:\\
+  \quad Abundance Matrix $\mathbf{A} = \mathbf{U}$
+\end{algorithm}
+
+The algorithm described above gives a efficient solution to the abundance estimation problem in a relatively low number of iterations. Additional inquiry shows that the updates for $\mathbf{V}$ and $\mathbf{D}$ can be done completely in parallel, allowing for further performance optimization. In practical applications, $\beta$ is the only parameter to be tuned, corresponding to the strength of the spatial regularization, $\kappa$ is predefined in Section \ref{Algorithm NCuts}, as such it is not the focus of tuning in this step. 
