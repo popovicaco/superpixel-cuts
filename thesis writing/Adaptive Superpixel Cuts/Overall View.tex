@@ -1,0 +1,29 @@
+In summary, the algorithm can be described as follows
+
+\begin{algorithm}[H]
+    \caption{Adaptive Superpixel Cuts for Hyperspectral Images}
+    \textbf{Input}: \\
+    \quad Hyperspectral Image $\mathbf{X} \in \mathbb{R}_+^{n_x \times n_y \times n_\lambda}$. \\
+    \quad Superpixel Parameters: $n_s$, $m$\\
+    \quad Segmentation Parameters: $n_e$, $\sigma$ , $\kappa$ \\
+    \quad Abundance Estimation Parameters: $\mu$ , $\beta$
+    \\
+    \textbf{Preprocessing:}\\ \quad Create Normalized Hyperspectral Image $\hat{\mathbf{X}}$ according to \eqref{alg:normalization}.
+    \\
+    \textbf{Superpixel Creation:}\\ \quad Generate superpixel matrix $\mathbf{C} \in \mathbb{R}_+^{n_\lambda \times n_s}$ according to Algorithm \ref{HSI SLIC} with parameters $n_s$, $m$.
+    \\
+    \textbf{Spatial Spectral Segmentation:}\\ \quad Perform an initial segmentation of the columns of the superpixel matrix $\mathbf{C}$ into $n_e$ partitions and form the spectra matrix $\mathbf{M} \in \mathbf{R}_+^{n_\lambda \times n_e}$ according to Algorithm \ref{Spatial Spectral Segmentation} with parameters $n_e$, $\sigma$, $\kappa$.
+    \\
+    \textbf{Abundance Estimation:}\\ \quad Perform abundance estimation to the columns of the superpixel matrix $\mathbf{C}$ relative to the spectra matrix $\mathbf{M}$, obtaining abudance matrix $A \in \mathbb{R}_+^{n_e \times n_s} $ according to Algorithm \ref{Graph Regularized AE} with parameters $\mu$ , $\beta$.
+    \\
+    \textbf{Feature Vector Creation}\\ \quad Form the feature matrix $\tilde{\mathbf{C}} \in \mathbb{R}_+^{(n_\lambda + n_e) \times n_s}$ according to \eqref{Feature Vector Creation}
+    \\
+    \textbf{Spatial Spectral Segmentation:}\\ \quad Perform the final segmentation of the columns of the superpixel matrix $\tilde{\mathbf{C}}$ into $n_e$ partitions according to Algorithm \ref{Spatial Spectral Segmentation} with parameters $n_e$, $\sigma$, $\kappa$.
+    \\
+    \textbf{Output}:\\
+    \quad Label vector $\mathbf{v}$, where $v_i \in {1,2, \cdots, n_e}$, corresponding to the final segmentation of the superpixels.
+  \end{algorithm}
+
+The superpixel parameters $n_s$ and $m$ are one time selections based off the requirements of the practioners, as $n_s$ determines the runtime of the algorithm. If $n_s$ is set too high, the more the superpixels resemble the original image itself, giving zero benefit to using a superpixel approach. Careful and reasonable selection of $n_s$ and $m$ should be done based off the requirements of the specific analysis to be done. In practice, setting $n_s$ such that $\frac{n_p}{n_s} \approx 16$ allows adequate results without extensive tuning of $m$. In similar fashion, the abundance estimation parameters $\mu$ and $\beta$ are one time, global selections. As mentioned in Section \ref{ADMM Intro}, the ADMM method provides modest accuracy solutions in a relatively low number of operations. In practice, the results of the algorithm are largerly insensitive to selection of $\mu$. In a similar manner, $\beta$ serves the purpose of reducing relative variations in abundance estimates between nearby superpixels, which aids in instances where two regions share similar spectral characteristics but are spatially distinct. 
+
+In application, the choice of parameters primarily focuses on on the segmentation parameters $n_e$, $\sigma$ , $\kappa$ as they dictate the initial and final segmentation of the image itself. Selection should be done to ensure an informative intial segmentation, then allow the algorithm to further refine it for the final segmentation according to the specific domain requirements.

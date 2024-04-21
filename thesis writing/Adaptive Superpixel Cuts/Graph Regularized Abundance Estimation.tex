@@ -1,11 +1,11 @@
 In Section \ref{AE}, the abundance estimation problem for a collection of pixels $\mathbf{X}$ given the endmember spectra matrix $\mathbf{M}$ was known was stated as follows:
 \begin{equation*}
-    \mathbf{A} = \argmin_{\mathbf{A} \in \mathbb{R}^{n_e \times n_p}} \frac{1}{2}\|\mathbf{MA} - \mathbf{X}\|_F^2 + \chi_\Delta(\mathbf{A}) + J(\mathbf{A}).
+    \mathbf{A} = \argmin_{\mathbf{A} \in \mathbb{R}^{n_e \times n_s}} \frac{1}{2}\|\mathbf{MA} - \mathbf{X}\|_F^2 + \chi_\Delta(\mathbf{A}) + J(\mathbf{A}).
 \end{equation*}
 
 The goal of this section is to apply a similar framework to the collection of superpixels $\mathbf{C}$ and determine estimates on the fractional abundances given an cluster spectra matrix $\mathbf{M}$ from the output of the clustering in Section \ref{Algorithm NCuts}. The abundance estimation problem in terms of superpixels can now be restated as
 \begin{equation*}
-    \mathbf{A} = \argmin_{\mathbf{A} \in \mathbb{R}^{n_e \times n_p}} \frac{1}{2}\|\mathbf{MA} - \mathbf{C}\|_F^2 + \chi_\Delta(\mathbf{A}) + J(\mathbf{A}).
+    \mathbf{A} = \argmin_{\mathbf{A} \in \mathbb{R}^{n_e \times n_s}} \frac{1}{2}\|\mathbf{MA} - \mathbf{C}\|_F^2 + \chi_\Delta(\mathbf{A}) + J(\mathbf{A}).
 \end{equation*}
 
 In previous sections, a regularization term $J$ was introduced to provide further control on the final values of $\mathbf{A}$. In imaging applications, a common assumption is that color values should typically not vary greatly for pixels next to eachother. In a similar fashion, abundance values should not vary greatly for superpixels spatially close to eachother. To accomodate this assumption, the matrix $\mathbf{W}_{\text{spatial}}$ given in \eqref{nc:spatial-mtx} can be exploited by considering
@@ -29,9 +29,9 @@ is minimized under the assumption that $\mathbf{a}_i$ and $\mathbf{a}_j$ should 
 The graph regularized abundance estimation problem with the known cluster spectra matrix $\mathbf{M}$ and regularization weight parameter $\beta > 0$ is represented as:
 \begin{equation}
     \label{unmixing:graph-reg-ae}
-    \mathbf{A} = \argmin_{\mathbf{A} \in \mathbb{R}^{n_e \times n_p}} \frac{1}{2}\|\mathbf{MA} - \mathbf{C}\|_F^2 + \chi_\Delta(\mathbf{A}) + \frac{\beta}{2}\text{tr}(\mathbf{ALA}^T).
+    \mathbf{A} = \argmin_{\mathbf{A} \in \mathbb{R}^{n_e \times n_s}} \frac{1}{2}\|\mathbf{MA} - \mathbf{C}\|_F^2 + \chi_\Delta(\mathbf{A}) + \frac{\beta}{2}\text{tr}(\mathbf{ALA}^T).
 \end{equation}
-The goal of this rest of the section is to demonstrate how this problem can be equivalently represented in a form where the alternating direction method of multipliers technique can be applied. The abundance estimation problem when one or more than one regularization terms are added belongs to a class of problems called global consensus optimization problems shown in Boyd et al. [REF]. The approach to transforming \eqref{unmixing:graph-reg-ae} is to introduce matrices $\mathbf{U} \in \mathbb{R}^{n_e \times n_p}$, $\mathbf{V}_1 \in \mathbb{R}^{n_b \times n_p}$, $\mathbf{V}_2 \in \mathbb{R}^{n_e \times n_p}$, and $\mathbf{V}_{3} \in \mathbb{R}^{n_e \times n_p}$ and rewrite the problem as:
+The goal of this rest of the section is to demonstrate how this problem can be equivalently represented in a form where the Alternating Direction Method of Multipliers [REF] technique can be applied. The abundance estimation problem when one or more than one regularization terms are added belongs to a class of problems called global consensus optimization problems shown in Boyd et al. [REF]. The standard approach to transforming \eqref{unmixing:graph-reg-ae} is to introduce matrices $\mathbf{U} \in \mathbb{R}^{n_e \times n_s}$, $\mathbf{V}_1 \in \mathbb{R}^{n_b \times n_s}$, $\mathbf{V}_2 \in \mathbb{R}^{n_e \times n_s}$, and $\mathbf{V}_{3} \in \mathbb{R}^{n_e \times n_s}$ and rewrite the problem as:
 \begin{equation}
     \label{unmixing:graph-reg-ae-admm-1}
     \begin{aligned}
@@ -265,6 +265,7 @@ The derived updates in \eqref{admm:ae-updates-final}, for parameters $\mu > 0$ a
 The algorithm is set to terminate when $ \|\mathbf{U}^{(k+1)} - \mathbf{U}^{(k)}\|_F/\|\mathbf{U}^{(k)}\|_F $ falls below a set tolerance $\epsilon$ or the algorithm reaches a maximum iterative index of $k_{\text{max}}$. After such point, $\mathbf{U}^{(k+1)}$ is given as the final result, representing the approximate solution of $\mathbf{A}$ to the minimization problem described in \eqref{unmixing:graph-reg-ae}. In it's entirety, the abundance estimation algorithm can be described with the following algorithm outline.
 
 \begin{algorithm}[H]
+  \label{Graph Regularized AE}
   \caption{Graph Regularized Abundance Estimation}
   \textbf{Input}: \\
   \quad  $\mathbf{C}$, $\mathbf{M}$, $\mathbf{W}_{\kappa}$, $\beta > 0$, $\mu > 0$, $k_{\text{max}} > 0$, $\epsilon > 0$.
@@ -293,4 +294,4 @@ The algorithm is set to terminate when $ \|\mathbf{U}^{(k+1)} - \mathbf{U}^{(k)}
   \quad Abundance Matrix $\mathbf{A} = \mathbf{U}$
 \end{algorithm}
 
-The algorithm described above gives a efficient solution to the abundance estimation problem in a relatively low number of iterations. Additional inquiry shows that the updates for $\mathbf{V}$ and $\mathbf{D}$ can be done completely in parallel, allowing for further performance optimization. In practical applications, $\beta$ is the only parameter to be tuned, corresponding to the strength of the spatial regularization, $\kappa$ is predefined in Section \ref{Algorithm NCuts}, as such it is not the focus of tuning in this step. 
+The ADMM-variant of the abundance estimation algorithm described above gives a efficient solution to in a relatively low number of iterations.. Additional inquiry shows that the updates for $\mathbf{V}$ and $\mathbf{D}$ can be done completely in parallel, allowing for further performance optimization. In practical applications, $\beta$ is the only parameter to be tuned, corresponding to the strength of the spatial regularization, $\kappa$ is predefined in Section \ref{Algorithm NCuts}, as such it is not the focus of tuning in this step. 

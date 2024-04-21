@@ -1,6 +1,6 @@
-In this section, we will introduce the Simple Linear Iterative Clustering (SLIC) algorithm. The algorithm is a special case of the k-means algorithm adapted to the task generating superpixels in a $5$-dimensional space, where the first $3$ dimensions correspond to the the pixel color vector in the CIELAB colorpsace, and last $2$ dimensions correspond to the spatial coordinates $(i,j)$ of the pixel in the image.. Formally, each pixel $\mathbf{x}_{(i,j)} = [x_l, x_a, x_b]$ is restructured into the form $\tilde{\mathbf{x}}_{(i,j)} = [x_l, x_a, x_b, i, j]$. With this modified feature vector $\tilde{\mathbf{x}}$, we incorporate both spectral and spatial information into the clustering, however, while the spectral information has bounds on it's values, the spatial information depends on the size of the image. 
+In this section, we will introduce the Simple Linear Iterative Clustering (SLIC) algorithm. The algorithm is a special case of the k-means algorithm adapted to the task generating superpixels in a $5$-dimensional space, where the first $3$ dimensions correspond to the the pixel color vector in the CIELAB colorpsace. Formally, each pixel $\mathbf{x}_{(i,j)} = [x_l, x_a, x_b]$. 
 
-Taking as an input the desired number of superpixels $n_s$, for an image with $n_p = n_x n_y$ pixels, each superpixel would be composed of approximately $n_s / n_p$ pixels. Assuming the superpixels lie on a grid, a superpixel centroid would occur at every grid interval $S = \sqrt{n_s/n_p}$. At the onset of the algorithm, a grid of $n_s$ superpixel centers $\mathbf{C}_n = [c_{l}, c_{a}, c_{b}, i, j]$ where $n = 1, \cdots, n_s$ are sampled across the image with regular grid intervals $S$. To avoid sampling noisy pixels, clusters are moved to the lowest gradient position in a $3 \times 3$ neighborhood where the image gradient is calcuated, using the original spectral vector $x$ in the CIELAB color space as:
+Taking as an input the desired number of superpixels $n_s$, for an image with $n_p = n_x n_y$ pixels, each superpixel would be composed of approximately $n_s / n_p$ pixels. Assuming the superpixels lie on a grid, a superpixel centroid would occur at every grid interval $S = \sqrt{n_s/n_p}$. At the onset of the algorithm, a grid of $n_s$ superpixel centers $\mathbf{C}_n = [c_{l}, c_{a}, c_{b}]$ where $n = 1, \cdots, n_s$ are sampled across the image with regular grid intervals $S$. To avoid sampling noisy pixels, clusters are moved to the lowest gradient position in a $3 \times 3$ neighborhood where the image gradient is calcuated, using the original spectral vector $\mathbf{x}$ in the CIELAB color space as:
 \begin{equation}
     \label{eq:slic-gradient}
     \mathbb{G}(i,j) = \|\mathbf{x}_{(i+1,j)} - \mathbf{x}_{(i-1,j)} \|^2 + \|\mathbf{x}_{(i,j+1)} - \mathbf{x}_{(i,j-1)} \|^2
@@ -9,24 +9,24 @@ Taking as an input the desired number of superpixels $n_s$, for an image with $n
 After initialization, a modified distance measure is proposed to enforce color similarity and spatial extent within the superpixels. Since the approximate area of each superpixel is $S^2$, it is assumed that pixels associated with a superpixel lie within a $2S \times 2S$ neighborhood of the superpixel centroid. Introducing the parameter $m$ to control the compactness and shape of the superpixels, the modified distance is then calculated as 
 \begin{equation}
     \label{eq:slic-cielab-distance}
-    \mathbb{D}(x, y) = \|\mathbf{x}_{lab} - \mathbf{y}_{lab}\|^2 + \frac{m}{S}\|\mathbf{x}_{ij} - \mathbf{y}_{ij}\|^2
+    \mathbb{D}(\mathbf{x}, \mathbf{c}_n) = \|\mathbf{x} - \mathbf{c}_n\|_2^2 + \frac{m}{S}d_{\text{spatial}}(\mathbf{x}, \mathbf{c}_n)^2
 \end{equation}
 
-Each pixel is the image is associated with the nearest cluster whose search area overlaps this pixel. After all pixels are associated with a cluster, a new center is computed as the average feature vector of all the pixels belonging to the cluster. This is repeated for a set number of iterations. After exhausting all iterations, a final step is performed by relabelling disjoint segments with the labels of the largest neighboring cluster. This step is optional as disjoint segments tend to not occur for larger inputs of $n_s$ and $m$.
+Each pixel is the image is associated with the nearest cluster whose search area overlaps this pixel. After all pixels are associated with a cluster, a new center is computed as the average feature vector of all the pixels belonging to the cluster. This is repeated for a set number of iterations $k_\text{max}$. 
 
 \begin{algorithm}[H]
     \caption{SLIC Superpixel Algorithm}
-    \textbf{Input}: $m > 0$, $n_s > 0$, $n_{\text{iters}} > 0$, CIELAB Image $\mathbf{X}$.
-
+    \textbf{Input}: \\
+    \quad CIELAB Image $\mathbf{X}$
+    \quad  $m > 0$, $n_s > 0$, $k_{\text{max}} > 0$
+    \\
     \textbf{Initialize:} $\mathbf{c}_n = [c_{l}, c_{a}, c_{b}, i, j]$ where $n = 1, \cdots, n_s$ by sampling pixels at regular grid intervals $S$. Perturb cluster centers to lowest gradient position in a $3 \times 3$ neighborhood according to \eqref{eq:slic-gradient} \\
     
-    \For{$k = 1$ \KwTo $n_{\text{iters}}$}{ 
+    \For{$k = 1$ \KwTo $k_{\text{max}}$}{ 
         Assign best matching pixels from a $2S \times 2S$ neighborhood around clusters $C_k$ according to distance measure \eqref{eq:slic-cielab-distance}. \\
         Compute new cluster centers according to average vector of all pixels belonging to cluster.
     }
-    \textbf{Optional:} Relabel disjoint segments.\\
-
     \textbf{Output}: Superpixeled Image $\mathbf{X}_s = [\mathbf{c}_1, \mathbf{c}_2, \dots, \mathbf{c}_{n_s}]$
 \end{algorithm}
 
-The SLIC algorithm is shown to produce meaningful and noise-robust segments in traditional computer vision applications. This algorithm proves useful in Section \ref{Algorithm Superpixels} when adapted as a pre-clustering step in the hyperspectral domain.
+The SLIC algorithm is shown to produce meaningful and noise-robust segments in traditional computer vision applications. This algorithm proves useful in Section \ref{Algorithm Superpixels} when adapted as a spatial preprocessing step in the hyperspectral domain.
