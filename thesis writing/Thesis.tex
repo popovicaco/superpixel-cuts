@@ -6,6 +6,7 @@
 \usepackage{algorithm2e}
 \usepackage{fancyhdr}
 \usepackage{caption}
+\usepackage{float}
 
 %############################ SETTINGS
 \RestyleAlgo{ruled}
@@ -63,7 +64,8 @@
 % #############################################
 \section{Introduction}
 \input{Introduction/Intro}
-\subsection{Applications to Biomedical Imaging}
+% \subsection{Applications to Biomedical Imaging}
+% \input{Introduction/BHSI.tex}
 
 \clearpage
 % #############################################
@@ -150,21 +152,19 @@
 % 
 % #############################################
 \section{Experimental Results}
+\input{Experimental Results/Implementation.tex}
 
-
-\subsection{Implementation Details}
-
-\clearpage
-\subsection{Geospatial Testing Datasets}
-\subsubsection{Samson Datasets}
-\subsubsection{Salinas Datasets}
-\subsubsection{Biomedical Autofluorescence Dataset}
+\subsection{Evaluation Datasets}
+\input{Experimental Results/Datasets.tex}
 
 \clearpage
 \subsection{Algorithm Evaluation}
-\subsubsection{Qualitative Evaluation on Samson}
+\input{Experimental Results/Comp Details.tex}
 \subsubsection{Quantitative Evaluation on Salinas}
-\subsubsection{Qualitative Evaluation on Biomedical Autofluorescence Data}
+\input{Experimental Results/Salinas.tex}
+\subsubsection{Qualitative Evaluation on Samson}
+\input{Experimental Results/Samson.tex}
+% \subsubsection{Qualitative Evaluation on Biomedical Autofluorescence Data}
 
 \clearpage
 \subsection{Algorithm Comparison}
