@@ -1,5 +1,4 @@
 ##personal addons
-*.ipynb
 datasets/
 .vscode/
 
@@ -176,3 +175,4 @@ display_imgs/
 *.synctex.gz
 
 method_comparison/
+.md
