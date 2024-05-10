@@ -1,4 +1,4 @@
-In \ref{SLIC}, the SLIC algorithm was introduced, aiming to perceptually group pixels into locally homogeneous groups called superpixels. While the SLIC algorithm was originally developed for use in the CIELAB colorspace, a similar methodology can be applied towards the hyperspectral space. The main change when trasitioning to the hyperspectral domain requires the consideration of all the spectral features.
+In \ref{SLIC}, the SLIC algorithm was introduced, aiming to perceptually group pixels into locally homogeneous groups called superpixels. While the SLIC algorithm was originally developed for use in the CIELAB color space, a similar methodology can be applied towards the hyperspectral space. The main modification when transitioning to the hyperspectral domain requires the consideration of all the spectral features.
 
 With the preprocessed hyperspectral image $\hat{\mathbf{X}}$, each pixel is represented by the vector $\hat{\mathbf{x}}_{(i,j)} = [\hat{x}_1, \hat{x}_2, \dots, \hat{x}_{n_\lambda}]$. Then, taking as an input the number of superpixels $n_s$, superpixel centroids $\mathbf{c}_n = [c_1, c_2, \dots, c_{n_\lambda}]$ where $n = 1,\dots, n_s$ are created at regular grid intervals $S = \sqrt{n_s/n_p}$ across the image. The initial centroids are moved to the lowest gradient position in a $3 \times 3$ spatial neighborhood where the image gradient is now calculated using the original hyperspectral features instead of the CIELAB features: 
 \begin{equation}
@@ -18,17 +18,16 @@ Each pixel is associated with the nearest cluster $\mathbf{c}_n$ whose search ar
     \label{HSI SLIC}
     \caption{Hyperspectral SLIC Algorithm}
     \textbf{Input}:\\
-    \quad  Preprocessed Hyperspectral Image $\hat{\mathbf{X}}$\\
-    \quad $m > 0$, $n_s > 0$, $k_{\text{max}}$\\
+    \quad  Preprocessed Hyperspectral Image $\hat{\mathbf{X}}$, $m > 0$, $n_s > 0$, $k_{\text{max}}$\\
 
-    \textbf{Initialize:} $\mathbf{c}_n = [c_1, c_2, \cdots, c_{n_\lambda}]$ where $n = 1, \cdots, n_s$ by sampling pixels at regular grid intervals $S$. Perturb cluster centers to lowest gradient position in a $3 \times 3$ neighborhood according to \eqref{eq:slic-gradient-2}. \\
-    
-    \For{$k = 1$ \KwTo $k_{\text{max}}$}{ 
-        Assign best matching pixels from a $2S \times 2S$ neighborhood around clusters $\mathbf{c}_k$ according to \eqref{eq:slic-cielab-distance-hsi}.\\
-         Compute new cluster centers according to average of all pixels belonging to cluster.
-    }
+    \textbf{Initialize:} \\ 
+    \quad $\mathbf{c}_n = [c_1, c_2, \cdots, c_{n_\lambda}]$ where $n = 1, \cdots, n_s$ by sampling pixels at regular grid intervals $S$. Perturb cluster centers to lowest gradient position in a $3 \times 3$ neighborhood according to \eqref{eq:slic-gradient-2}. \\
+    \textbf{For} $k = 0$ \text{to} $k_{\text{max}}$:\\
+    \quad Assign best matching pixels from a $2S \times 2S$ neighborhood around clusters $\mathbf{c}_1, \mathbf{c}_2, \dots, \mathbf{c}_{n_s}$ according to \eqref{eq:slic-cielab-distance-hsi}.\\
+    \quad Compute new cluster centers according to average of all pixels belonging to cluster.
+    \\
     \textbf{Output}: Superpixeled Image Matrix $\mathbf{C}$
 \end{algorithm}
 
 
-In the hyperspectral domain, superpixels are slightly less adept at creating visually meaningful partitionings due to use of the raw hyperspectral spectra rather than a perceptual colorspace like CIELAB. To alleviate this, higher values of $m$ and $n_s$ are used to form more spatially compact regions akin to the ones formed in the original algorithm. Nonetheless, superpixels are valuable in allowing practioners to avoid having to consider the variation between individual pixels and instead consider the spectral and spatial variations between these new perceptual groupings of pixels. 
+In the hyperspectral domain, superpixels are slightly less adept at creating visually meaningful partitioning due to use of the raw hyperspectral spectra rather than a perceptual color space like CIELAB. To alleviate this, higher values of $m$ and $n_s$ are used to form more spatially compact regions akin to the ones formed in the original algorithm. Nonetheless, superpixels are valuable in allowing practitioners to avoid having to consider the variation between individual pixels and instead consider the spectral and spatial variations between these new perceptual groupings of pixels. 

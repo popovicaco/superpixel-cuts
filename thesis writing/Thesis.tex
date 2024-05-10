@@ -7,6 +7,7 @@
 \usepackage{fancyhdr}
 \usepackage{caption}
 \usepackage{float}
+\usepackage[style=apa,backend=biber]{biblatex} \addbibresource{bibliography.bib}
 
 %############################ SETTINGS
 \RestyleAlgo{ruled}
@@ -29,8 +30,8 @@
 % 
 % #############################################
 \title{Adaptive Superpixel Cuts for Hyperspectral Images}
-\author{Aleksandar Popovic}
-\date{February 2024}
+\author{Aleksandar Popovic \\ Supervised by Dr. You Liang \& Dr. Na Yu}
+\date{}
 
 \begin{document}
 
@@ -39,7 +40,7 @@
 \begin{abstract}
     Blind segmentation in hyperspectral images is a challenging problem. Many traditional methods suffer from poor identification of materials and expensive computational costs, which can be partially eased by trading the accuracy with efficiency.
 
-    In this paper, we propose a novel graph-based algorithm for segmentation in hyperspectral images. Utilizing the fact that pixels in a local region are likely to have similar spectral features, a pre-clustering algorithm is used to extract the homogenous regions, called superpixels. After extracting the superpixels, a weighted graph is constructed with the weights representing both the spectral similarity and spatial distance between each superpixel and its neighbors. The normalized graph cuts algorithm is then used to perform an initial segmentation of the image. To effectively extract the material information in the superpixels, the mean spectra in each segment is used to estimate the abundance of each endmember in each superpixel using a graph regularized hyperspectral unmixing algorithm. The resulting abundance information is used as a supportive feature, which when combined with the spectral features, form a new spectral feature vector for each superpixel. Using this new feature vector, the weighted graph is once again constructed and the normalized cuts algorithm is applied, resulting in a final segmentation of the image.
+    In this paper, we propose a novel graph-based algorithm for segmentation in hyperspectral images. Utilizing the fact that pixels in a local region are likely to have similar spectral features, a pre-clustering algorithm is used to extract the homogeneous regions, called superpixels. After extracting the superpixels, a weighted graph is constructed with the weights representing both the spectral similarity and spatial distance between each superpixel and its neighbors. The normalized graph cuts algorithm is then used to perform an initial segmentation of the image. To effectively extract the material information in the superpixels, the mean spectra in each segment is used to estimate the abundance of each endmember in each superpixel using a graph regularized hyperspectral unmixing algorithm. The resulting abundance information is used as a supportive feature, which when combined with the spectral features, form a new spectral feature vector for each superpixel. Using this new feature vector, the weighted graph is once again constructed and the normalized cuts algorithm is applied, resulting in a final segmentation of the image.
 
     Experiments on a real hyperspectral datasets illustrate great potential of the proposed method in terms of accuracy and efficiency.
 \end{abstract}
@@ -52,6 +53,17 @@
 % 
 % 
 % #############################################
+\section*{Acknowledgements}
+
+Words cannot express my gratitude to my supervisors Dr. You Liang and Dr. Na Yu for their invaluable guidance over the past two years. They were the best providers of constructive feedback and mentors I could ask for. They helped me develop not only my research skills but also my critical thinking and problem-solving abilities. Their advice and encouragement will continue to be valuable assets in my future endeavors.
+
+Thank you to our experimental collaborators, Dr. Yeni Yucel and his Ophthalmic Pathology lab at St. Micheals Hospital for providing the motivation in developing this work. 
+
+I’d like to thank my family and friends for their support every step of the way. I would also like to thank my grandfather for instilling the importance of lifelong education at a young age.  
+\clearpage
+
+
+
 \tableofcontents
 
 \clearpage
@@ -188,5 +200,8 @@
 % #############################################
 \section{Conclusions}
 \input{Introduction/Conclusion.tex}
+
+
+\printbibliography
 
 \end{document}

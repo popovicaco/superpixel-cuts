@@ -1,27 +1,27 @@
-Given the linear mixing model as formulated in Section \ref{LMM}, in traditional hyperspectral imaging tasks, both $\mathbf{M}$ and $\mathbf{A}$ are unknown. Often, researchers aim to estimate $\mathbf{M}$ first, as spectral signatures collected from endmembers in same scene under the same conditions will be almost identical. Notably, in the field of remote sensing, effort has been made to create a library of spectral signatures derived from common vegetation and minerals in land cover images, allowing focus to be made solely in estimating $\mathbf{A}$ [REF]. This section will cover the scenario where $\mathbf{M}$ is known and $\mathbf{A}$ is to be estimated. The task is referred to as abundance estimation and continues to be an active area of research, where the aim is to find $\mathbf{A}$ such that an error function $\mathcal{L}$ is minimized with respect to the reconstructed collections of pixels $\tilde{\mathbf{X}} = \mathbf{MA}$ and the original collection of pixels $\mathbf{X}$. Traditionally, we aim to minimize the least-square reconstruction error between the entries in $\tilde{\mathbf{X}}$ and $\mathbf{X}$
+Given the linear mixing model (\eqref{lmm:abund-lmm-collection}), in traditional hyperspectral imaging tasks, both $\mathbf{M}$ and $\mathbf{A}$ are unknown. Often, researchers aim to estimate $\mathbf{M}$ first, as spectral signatures collected from endmembers in same scene under the same conditions will be almost identical. Notably, in the field of remote sensing, effort has been made to create a library of spectral signatures derived from common vegetation and minerals in land cover images, allowing focus to be made solely in estimating $\mathbf{A}$ (\cite{ECOSTRESS}). This section will cover the scenario where $\mathbf{M}$ is known and $\mathbf{A}$ is to be estimated. The task is referred to as abundance estimation and continues to be an active area of research, where the aim is to find $\mathbf{A}$ such that an error function $\mathcal{L}$ is minimized with respect to the reconstructed collections of pixels $\tilde{\mathbf{X}} = \mathbf{MA}$ and the original collection of pixels $\mathbf{X}$. Traditionally, we aim to minimize the least-square reconstruction error between the entries in $\tilde{\mathbf{X}}$ and $\mathbf{X}$
 
 \begin{equation}
     \label{ae:fnorm}
-    \mathcal{L}(\mathbf{X},\tilde{\mathbf{X}}) = \sum_{i=1}^{n_b} \sum_{j=1}^{n_p} \left(\mathbf{x}_{(i,j)} - \tilde{\mathbf{x}}_{(i,j)}\right)^2 = \|\tilde{\mathbf{X}} - \mathbf{X}\|_F^2.
+    \mathcal{L}(\mathbf{X},\tilde{\mathbf{X}}) = \sum_{i=1}^{n_\lambda} \sum_{j=1}^{n_p} \left(\mathbf{x}_{(i,j)} - \tilde{\mathbf{x}}_{(i,j)}\right)^2 = \|\tilde{\mathbf{X}} - \mathbf{X}\|_F^2 
 \end{equation}
 
-The least-squares reconstruction error can alternatively be written as the squared Frobenius norm, denoted as $\|\cdot\|_F^2$, of the difference between  $\tilde{\mathbf{X}}$ and $\mathbf{X}$. This choice of $\mathcal{L}$ is the straightforwardadn natural approach as $\mathcal{L}$ is both convex and differentiable, with the additional properties that $\mathcal{L}(\tilde{\mathbf{X}},\mathbf{X}) = \mathcal{L}(\mathbf{X},\tilde{\mathbf{X}})$ and $ \mathcal{L}(\mathbf{X},\tilde{\mathbf{X}}) = \mathcal{L}(\mathbf{X}^T,\tilde{\mathbf{X}^T})$ [REF].
+The least-squares reconstruction error can alternatively be written as the squared Frobenius norm, denoted as $\|\cdot\|_F^2$, of the difference between  $\tilde{\mathbf{X}}$ and $\mathbf{X}$. This choice of $\mathcal{L}$ is the straight forward and natural approach as $\mathcal{L}$ is both convex and differentiable, with the additional properties that $\mathcal{L}(\tilde{\mathbf{X}},\mathbf{X}) = \mathcal{L}(\mathbf{X},\tilde{\mathbf{X}})$ and $ \mathcal{L}(\mathbf{X},\tilde{\mathbf{X}}) = \mathcal{L}(\mathbf{X}^T,\tilde{\mathbf{X}^T})$ (\cite{UNMIX}).
 
-To incorporate the ANC-ASC constraint into the overall formulation of $\mathcal{L}$, the set $\Delta$ from Section \ref{LMM} proves useful. It is important to note that $\Delta$ is a convex set, meaning that for matrices $A, B \in \Delta$, for all $0 \leq \alpha \leq 1$, the matrix $C = \alpha A + (1- \alpha)B$ is also an element of $\Delta$. The inclusion of the constraints on $\mathbf{A}$ is facilitated using the piecewise function $\chi_S$ defined as follows
+To incorporate the ANC-ASC constraint into the overall formulation of $\mathcal{L}$, the set $\Delta$ from Section \ref{LMM} plays a significant role. It is important to note that $\Delta$ is a convex set, meaning that for matrices $A, B \in \Delta$, for all $0 \leq \alpha \leq 1$, the matrix $C = \alpha A + (1- \alpha)B$ is also an element of $\Delta$. The inclusion of the constraints on $\mathbf{A}$ is facilitated using the piece wise function $\chi_S$ defined as follows
 
 \begin{equation}
     \label{ae:indfunc}
     \chi_{S}(x) = 
             \begin{cases}
             0 &\text{if } x \in S \\
-            \infty &\text{if } x \not \in S.
+            \infty &\text{if } x \not \in S 
             \end{cases}
 \end{equation}
 
-Adding $\chi_\Delta$ in the formulation of $\mathcal{L}$ restricts the values $\mathbf{A}$ can take on to the set $\Delta$, while ensuring that the overall formulation still has a global minimum within $\Delta$. Additionally, a regularization term $J$ can be added to impose additional constraints on the values in $\mathbf{A}$. Formally, abudance estimation can be formualated as a convex optimization problem of the form 
+Adding $\chi_\Delta$ in the formulation of $\mathcal{L}$ restricts the values $\mathbf{A}$ can take on to the set $\Delta$, while ensuring that the overall formulation still has a global minimum within $\Delta$. Additionally, a regularization term $J$ can be added to impose additional constraints on the values in $\mathbf{A}$. Formally, abundance estimation can be formulated as a convex optimization problem of the form 
 \begin{equation}
     \label{ae:ae-min-1}
-    \mathbf{A} = \argmin_{\mathbf{A} \in \mathbb{R}^{n_e \times n_p}} \frac{1}{2}\|\mathbf{MA} - \mathbf{X}\|_F^2 + \chi_\Delta(\mathbf{A}) + J(\mathbf{A}).
+    \widehat{\mathbf{A}} = \argmin_{\mathbf{A} \in \mathbb{R}^{n_e \times n_p}} \frac{1}{2}\|\mathbf{MA} - \mathbf{X}\|_F^2 + \chi_\Delta(\mathbf{A}) + J(\mathbf{A}) 
 \end{equation}
 
-This problem has no closed form solution, relying on iterative methods or applying solvers like GUROBI [REF] or CVXOPT [REF] to solve the problem for individual pixels given the problem can be split pixelwise. The formulation of the abundance estimation problems allows for additional specifications to be added depending on the domain of research. 
+This problem has no closed form solution, relying on iterative methods or applying solvers to solve the problem for individual pixels given the problem can be split pixel wise. The formulation of the abundance estimation problems allows for additional image specifications to be added depending on the domain of research. 

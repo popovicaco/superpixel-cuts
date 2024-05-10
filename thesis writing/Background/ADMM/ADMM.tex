@@ -1,4 +1,4 @@
-Alternating Direction Method of Multipliers, or ADMM, introduced by Boyd et al. [REF] is a framework for solving convex optimization problems of the form:
+Alternating Direction Method of Multipliers, or ADMM, introduced in (\cite{ADMM}), is a framework for solving convex optimization problems of the form:
 \begin{equation}
     \label{admm:prob}
     \begin{aligned}
@@ -11,10 +11,10 @@ with variables $x \in \mathbb{R}^{n}$ and $z \in \mathbb{R}^{m}$, where $A \in \
     \label{admm:lagrangian}
     \mathcal{L}_{\mu}(x,z,y) = f(x) + g(z) + y^T(Ax + Bz - c) + \frac{\mu}{2} \|Ax + Bz - c\|_2^2
 \end{equation}
-where $\mu > 0$ is augmented lagrangian convergence parameter and $y \in \mathbb{R}^{p}$ is the corresponding dual variable. Scaling with $u  = \frac{1}{\mu} y $ gives the following equivalent definition: 
+where $\mu > 0$ is augmented Lagrangian convergence parameter and $y \in \mathbb{R}^{p}$ is the corresponding dual variable. Scaling with $u  = \frac{1}{\mu} y $ gives the following equivalent definition: 
 \begin{equation}
     \label{admm:lagrangian-real}
-    \mathcal{L}_{\mu}(x,z,u) = f(x) + g(z) + \frac{\mu}{2} \|Ax + Bz - c + u\|_2^2.
+    \mathcal{L}_{\mu}(x,z,u) = f(x) + g(z) + \frac{\mu}{2} \|Ax + Bz - c + u\|_2^2 
 \end{equation}
 
 ADMM aims to minimize scaled form of $\mathcal{L}_{\mu}$ by alternating minimizations with respect to $x$, $y$, and $u$ by performing the following updates:
@@ -24,9 +24,9 @@ ADMM aims to minimize scaled form of $\mathcal{L}_{\mu}$ by alternating minimiza
     \begin{aligned}
         x^{(k+1)} &= \argmin_{x} \mathcal{L}_{\mu}(x,z^{(k)},u^{(k)})  \\
         z^{(k+1)} &= \argmin_{z} \mathcal{L}_{\mu}(x^{(k+1)},z,u^{(k)}) \\
-        u^{(k+1)} &= u^{(k)} + Ax^{(k+1)} + Bz^{(k+1)} - c.
+        u^{(k+1)} &= u^{(k)} + Ax^{(k+1)} + Bz^{(k+1)} - c 
     \end{aligned} 
 \end{equation}
 
-Under mild conditions on $f$ and $g$, ADMM can be shown to provide guarenteed objective and residual convergence, independent on choice of $\mu$. For lax choices of $\mu$, the algorithm provides modest accuracy solutions in a relatively low number of iterations, favorable to tasks in statistical learning where parameter estimation often yields little improvement to results. The algorithm allows practioners to put focus on efficient implementations to the minimization problems for $x$ and $z$, and not on parameter tuning.
+Under mild conditions on $f$ and $g$, ADMM can be shown to provide guaranteed objective and residual convergence, independent on choice of $\mu$. For lax choices of $\mu$, the algorithm provides modest accuracy solutions in a relatively low number of iterations, favorable to tasks in statistical learning where parameter estimation often yields little improvement to results. The algorithm allows practitioners to put focus on efficient implementations to the minimization problems for $x$ and $z$, and not on parameter tuning.
 

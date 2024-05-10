@@ -3,7 +3,7 @@ A graph $G = (V,E)$ with affinity matrix $\mathbf{W}$ can be partitioned into tw
     \label{sc:cut}
     \cut(G_A,G_B) = \sum_{i \in V_A,\;j \in V_B}{\mathbf{W}_{(i,j)}}
 \end{equation}
-The optimal bipartitioning of $G_W$ is given as the graphs $G_A$ and $G_B$ that minimize \eqref{sc:cut}. However, in the case of image segmentation, this criteria will heavily prioritize partitioning single pixels from the image. Instead, the normalized cuts criteria [REF] is proposed, focusing on balancing the ratio between the edges cut and the sum of the internal edge nodes within $G_A$ and $G_B$ defined as 
+The optimal bi-partitioning of $G_W$ is given as the graphs $G_A$ and $G_B$ that minimize \eqref{sc:cut}. However, in the case of image segmentation, this criteria will heavily prioritize partitioning single pixels from the image. Instead, the normalized cuts criteria is proposed, focusing on balancing the ratio between the edges cut and the sum of the internal edge nodes within $G_A$ and $G_B$ defined as 
 \begin{equation}
     \label{sc:ncut-criteria}
     \ncut(G_A, G_B) = \frac{\cut(G_A, G_B)}{\assoc(G_A, G)} + \frac{\cut(G_A, G_B)}{\assoc(G_B, G)}
@@ -11,13 +11,13 @@ The optimal bipartitioning of $G_W$ is given as the graphs $G_A$ and $G_B$ that 
 where 
 \begin{equation}
     \label{sc:assoc}
-    \assoc(G_A, G) = \sum_{i \in V_A,\;j \in V}{\mathbf{W}_{(i,j)}}.
+    \assoc(G_A, G) = \sum_{i \in V_A,\;j \in V}{\mathbf{W}_{(i,j)}} 
 \end{equation}
-The normalized cuts criteria, in general terms, aims to minimize the disassociation between the subgraphs and maximize the association within them. While \eqref{sc:ncut-criteria} is NP-Complete, Shi et. al [REF] show that solving for the eigenvector $\mathbf{u}_2$ corresponding to the second smallest eigenvalue $\lambda_2$ in the system
+The normalized cuts criteria, in general terms, aims to minimize the disassociation between the subgraphs and maximize the association within them. While \eqref{sc:ncut-criteria} is NP-Complete, (\cite{NCUTS}) show that solving for the eigenvector $\mathbf{u}_2$ corresponding to the second smallest eigenvalue $\lambda_2$ in the system
 \begin{equation}
     \label{sc:ncuts-formula}
     \mathbf{D}^{-\frac{1}{2}}(\mathbf{D} - \mathbf{W})\mathbf{D}^{-\frac{1}{2}}\mathbf{z} = \lambda \mathbf{z}
 \end{equation}
 provides a approximate real valued solution to \eqref{sc:ncut-criteria} through assigning subgraph membership of the vertices according to the sign of the entries in $\mathbf{u}_2$.
 
-Spectral graph techniques like the normalized cuts algorithm provide the advantage of flexibile and deterministic results based on the initialization of the adjacency matrix $\mathbf{W}$, however begin to fall behind iterative methods when the graph is large, due to the time complexity of solving \eqref{sc:ncuts-formula} scaling cubically with the number of vertices. 
+Spectral graph techniques like the normalized cuts algorithm provide the advantage of flexible and deterministic results based on the initialization of the adjacency matrix $\mathbf{W}$, however begin to fall behind iterative methods when the graph is large, due to the time complexity of solving \eqref{sc:ncuts-formula} scaling cubically with the number of vertices. 

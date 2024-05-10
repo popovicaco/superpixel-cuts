@@ -1,24 +1,24 @@
-In Section \ref{Spectral Clustering}, the Normalized Cuts algorithm was introduced for the task of bipartitioning a group of pixels through creating an affinity matrix and solving the relaxed eigensystem in \eqref{sc:ncuts-formula}. Considering a matrix of superpixels $\mathbf{C}$ from the results of the SLIC algorithm in Section \ref{Algorithm Superpixels}, two matrices are formed. The first matrix is the spectral affinity matrix $\mathbf{W_{\text{spectral}}}$ given by calculating the spectral angle [REF] between the spectral features of each pair of superpixels:
+In Section \ref{Spectral Clustering}, the Normalized Cuts algorithm was introduced for the task of bipartitioning a group of pixels through creating an affinity matrix and solving the relaxed eigensystem in \eqref{sc:ncuts-formula}. Considering a matrix of superpixels $\mathbf{C}$ from the results of the SLIC algorithm in Section \ref{Algorithm Superpixels}, two matrices are formed. The first matrix is the spectral affinity matrix $\mathbf{W_{\text{spectral}}}$ given by calculating the spectral angle between the spectral features of each pair of superpixels:
 \begin{equation}
     \label{nc:spectral-mtx}
-    \mathbf{W_{\text{spectral}}}_{(i,j)} = \arccos\left(\frac{\mathbf{c}_i \mathbf{c}_j^T}{\|\mathbf{c}_i\|_2\|\mathbf{c}_j\|_2}\right).
+    \mathbf{W_{\text{spectral}}}_{(i,j)} = \arccos\left(\frac{\mathbf{c}_i \mathbf{c}_j^T}{\|\mathbf{c}_i\|_2\|\mathbf{c}_j\|_2}\right) 
 \end{equation}
 The second matrix is the spatial distance matrix $\mathbf{W_{\text{spatial}}}$ given by calculating the spatial euclidean distance between each pair of superpixels:
 \begin{equation}
     \label{nc:spatial-mtx}
-    \mathbf{W_{\text{spatial}}}_{(i,j)} = d_{\text{spatial}}(\mathbf{c}_i, \mathbf{c}_j).
+    \mathbf{W_{\text{spatial}}}_{(i,j)} = d_{\text{spatial}}(\mathbf{c}_i, \mathbf{c}_j) 
 \end{equation}
-To combine the spatial and spectral information within the image, a spectral similarity parameter $\sigma > 0$ and spatial limit parameter $\kappa > 0$ are introduced and the spatial-spectral affinity matrix $\mathbf{W}$ is then constrcuted as follows
+To combine the spatial and spectral information within the image, a spectral similarity parameter $\sigma > 0$ and spatial limit parameter $\kappa > 0$ are introduced and the spatial-spectral affinity matrix $\mathbf{W}$ is then constructed as follows
 \begin{equation}
     \label{nc:spatial-spectral-mtx}
     \mathbf{W}_{(i,j)} = \begin{cases}
         \exp\left(-\frac{\mathbf{W_{\text{spectral}}}_{(i,j)}^2}{\sigma^2}\right) &\quad \text{if } \mathbf{W_{\text{spatial}}}_{(i,j)} \leq \kappa\\
-        0 &\quad \text{if } \mathbf{W_{\text{spatial}}}_{(i,j)} > \kappa.
+        0 &\quad \text{if } \mathbf{W_{\text{spatial}}}_{(i,j)} > \kappa 
     \end{cases}
 \end{equation}
-The intuiton behind constructing the spatial-spectral affinity matrix is to calculate spectral similarity between two superpixels if and only if the centroids of the superpixels are within a spatial range $\kappa$ of each other. This introduces spatial compactness within the partitioning.
+The intuition behind constructing the spatial-spectral affinity matrix is to calculate spectral similarity between two superpixels if and only if the centroids of the superpixels are within a spatial range $\kappa$ of each other. This introduces spatial compactness within the partitioning.
 
-After constructing the spatial-spectral affinity matrix, the goal is to to then utilize the normalized cuts algorithm to recursively bipartition the graph $G_\mathbf{W}$ represented by $\mathbf{W}$ into $n_e$ subgraphs. Doing so provides a segmentation of the columns of $\mathbf{C}$ representing the superpixels into $n_e$ clusters. Using the spatial-spectral affinity matrix $\mathbf{W}$, the diagonal matrix $\mathbf{D}$ is calculated according \eqref{sc:d-mtx} and the initial bipartitioning of $G_\mathbf{W}$ can be determined by solving for the second smallest eigenvalue $\lambda_2$ and the corresponding eigenvector $\mathbf{u}_2$ in the system given in \eqref{sc:ncuts-formula}. Bipartitioning the graph $G_\mathbf{W}$ according the sign of the entries in $\mathbf{u}_2$, the next partition is given by the one that minimizes \eqref{sc:ncut-criteria} within the two subgraphs. This process is continued until the graph $G_\mathbf{W}$ is partitioned into $n_e$ subgraphs. Cluster membership of the superpixels in $\mathbf{C}$ are assigned to the corresponding subgraph they belong to. Additionally, the mean spectral signatures of the superpixels within each cluster are calculated and arranged into the matrix $\mathbf{M}$.
+After constructing the spatial-spectral affinity matrix, the goal is to to then utilize the normalized cuts algorithm to recursively bi-partition the graph $G_\mathbf{W}$ represented by $\mathbf{W}$ into $n_e$ subgraphs. Doing so provides a segmentation of the columns of $\mathbf{C}$ representing the superpixels into $n_e$ clusters. Using the spatial-spectral affinity matrix $\mathbf{W}$, the diagonal matrix $\mathbf{D}$ is calculated according \eqref{sc:d-mtx} and the initial bi-partitioning of $G_\mathbf{W}$ can be determined by solving for the second smallest eigenvalue $\lambda_2$ and the corresponding eigenvector $\mathbf{u}_2$ in the system given in \eqref{sc:ncuts-formula}. Bi-partitioning the graph $G_\mathbf{W}$ according the sign of the entries in $\mathbf{u}_2$, the next partition is given by the one that minimizes \eqref{sc:ncut-criteria} within the two subgraphs. This process is continued until the graph $G_\mathbf{W}$ is partitioned into $n_e$ subgraphs. Cluster membership of the superpixels in $\mathbf{C}$ are assigned to the corresponding subgraph they belong to. Additionally, the mean spectral signatures of the superpixels within each cluster are calculated and arranged into the matrix $\mathbf{M}$.
 
 \begin{algorithm}[H]
     \label{Spatial Spectral Segmentation}
