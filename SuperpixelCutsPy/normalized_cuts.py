@@ -730,3 +730,5 @@ def graph_test_regularized_ncuts_admm(data,
     labelled_img = assign_labels_onto_image(superpixel_assignments, superpixel_cluster_labels)
 
     return labelled_img, mean_cluster_spectra, intermediate_results 
+
+#$temp
